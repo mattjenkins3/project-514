@@ -24,3 +24,20 @@ Pilot exit criteria: all three days reviewed, no duplicate logical deliveries or
 ## Rollback and restore rehearsal
 
 For local use, stop the server and use `control pause` before any further mock runs using the same demo state. Keep the previous database file with restricted permissions, copy it while the app is stopped, and reopen the copy with `serve --db PATH`. Compare history and email previews; reauthenticate using that process's private entry URL. Keep simulation data in its own output directory. For future production, disable dispatch and scheduling first, reconcile queued sends, preserve existing audit rows, and restore the last verified backup and matching template/rule version before a supervised restart.
+
+## Gmail authorization for unattended delivery
+
+A Gmail connection in Codex can authorize actions in the chat. A hosted worker needs a separate Google OAuth client with Gmail API enabled and the narrow `https://www.googleapis.com/auth/gmail.send` scope. The approved sender authorizes this client with offline access. Store its client ID, client secret and refresh token through the host's secret settings. Do not paste tokens into chat or source control. Confirm the OAuth consent configuration supports ongoing offline use; an external OAuth app in Google's Testing state can receive refresh tokens that expire after seven days. If applicable, check Google Workspace policy and consent or verification requirements before relying on the worker.
+
+The Gmail transport has mock HTTP tests for OAuth refresh, a single approved recipient, multipart formatting and ambiguous send failures. Its endpoints are `oauth2.googleapis.com` and `gmail.googleapis.com`. The current app and manual dispatch still use the mock only. Before connecting the transport, choose the production host, configure authenticated HTTPS check-in URLs, set the approved sender and recipient, and verify how a worker will reconcile an uncertain Gmail response without automatically resending.
+
+Run the preflight inside the environment that holds the five Gmail settings:
+
+```sh
+python -m project514.gmail_preflight
+python -m project514.gmail_preflight --refresh
+```
+
+The first command checks presence and address format without network access. The second asks Google's token endpoint to validate the refresh grant and discards the access token. Neither command sends an email. A successful refresh does not establish the sender's identity or verify receipt. Keep the refresh grant and the final pilot send separate.
+
+For the GitHub `pilot` environment, open **Actions → Gmail pilot preflight → Run workflow**, select `main`, and inspect the **Check refresh grant without sending mail** step. The workflow is manual and reads the configured `pilot` values only for that step.
