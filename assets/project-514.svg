@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="400" viewBox="0 0 1100 400" role="img" aria-labelledby="title desc">
+  <title id="title">Project 5.14</title>
+  <desc id="desc">A warm yellow climbing line rises across a dark green panel, beside the Project 5.14 wordmark.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#203731"/>
+      <stop offset="1" stop-color="#10241f"/>
+    </linearGradient>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0H0v28" fill="none" stroke="#d6e6d9" stroke-opacity=".13"/>
+    </pattern>
+    <clipPath id="tile"><rect x="62" y="62" width="276" height="276" rx="22"/></clipPath>
+  </defs>
+  <rect width="1100" height="400" rx="30" fill="url(#panel)"/>
+  <g clip-path="url(#tile)">
+    <rect x="62" y="62" width="276" height="276" fill="#28433a"/>
+    <rect x="62" y="62" width="276" height="276" fill="url(#grid)"/>
+    <path d="M28 307 126 256 162 259 241 201 271 205 358 115M37 334l95-52 42 3 80-60 28 4 78-82M44 356l94-48 46 1 84-60 32-7 38-43" fill="none" stroke="#91aa96" stroke-opacity=".36" stroke-width="2" stroke-linejoin="round"/>
+    <path d="m102 274 48-51-9-29 66-24 28-48 62-17" fill="none" stroke="#f7d37d" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="102" cy="274" r="8" fill="#28433a" stroke="#f7d37d" stroke-width="5"/>
+    <circle cx="297" cy="105" r="10" fill="#f7d37d"/>
+  </g>
+  <rect x="62.5" y="62.5" width="275" height="275" rx="21.5" fill="none" stroke="#8ba898" stroke-opacity=".44"/>
+  <text x="404" y="142" fill="#f7d37d" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="9">PROJECT</text>
+  <text x="397" y="269" fill="#f7f3e6" font-family="Arial, Helvetica, sans-serif" font-size="154" font-weight="700" letter-spacing="-5">5.14</text>
+  <path d="M411 307h610" stroke="#a4baaa" stroke-opacity=".45"/>
+  <text x="410" y="336" fill="#d2dfd4" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="5">CLIMBING  /  RUNNING</text>
+</svg>

@@ -1,39 +1,11 @@
 # Project 5.14
 
-A local coaching prototype for a 12-week climbing and running block. It prepares a daily plan, accepts a short mobile check-in, and records the evidence behind the next plan. Every email is a browser preview, file, or in-process mock. The demo uses synthetic data and keeps the official start date unset.
+![Project 5.14 logo. A climbing line rises across a dark green panel.](assets/project-514.svg)
 
-## Run locally
+**A 12-week climbing and running coach in ChatGPT Plus.** Project 5.14 builds toward more consistent climbing, stronger movement near the top of hard routes, and sustainable running mileage.
 
-From the repository root with Python 3.12 and IANA timezone data installed:
+At **6:00 a.m. Denver time**, the coach prepares the day's workout, including warm-up, main work, cooldown, fueling and a technique cue. From **Day 2**, the morning message also asks how yesterday went. Reply in the same chat and the coach will explain what it changes for today or future sessions. Missing feedback, poor recovery and pain lead to easier options or rest. Missed workouts stay missed.
 
-```sh
-python -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
-.venv/bin/python -m unittest discover -s tests -v
-.venv/bin/python -m project514.demo serve --port 8000
-```
+[Set up the daily task](docs/launch.md) · [Copy the coaching prompt](docs/task-prompt.md) · [See the training approach](docs/training.md)
 
-Open the private loopback entry URL printed by `serve` in a browser on the same machine. The dashboard links to that day's **HTML**, **Text**, and **Check-in**. Save a synthetic entry, then edit it to see correction history take effect on future plans. Use the printed URL again after the dashboard session expires. Stop the server with Ctrl+C. To preview in a remote cloud workspace, open the URL using a browser on that machine.
-
-To generate a week of HTML and text samples plus deload and red-flag examples, run:
-
-```sh
-.venv/bin/python -m project514.demo simulate --start 2026-02-16 --output .local/mixed
-.venv/bin/python -m project514.demo simulate --start 2026-02-16 --scenario steady --output .local/steady
-```
-
-Choose fresh output directories if these exist already. Open `.local/mixed/email-2026-02-16.html` or read its `.txt` counterpart. The links in exported emails are illustrative. The mixed run produces 84 plans, 82 mock deliveries, two paused days and one recovered timeout. The steady run produces 84 mock deliveries. Each writes a JSON summary, the full decision trace, and a SQLite ledger.
-
-Local controls affect future days. The review command records manual acknowledgement after the concern has been assessed; it cannot determine fitness to exercise.
-
-```sh
-.venv/bin/python -m project514.demo control pause
-.venv/bin/python -m project514.demo control resume
-.venv/bin/python -m project514.demo control review
-```
-
-The default local database is `.local/demo.sqlite3`. Pass `--db PATH` to use a separate synthetic sandbox. Stop the app before copying or removing a demo database. Keep local databases, terminal entry links, real athlete data, and preview artifacts out of source control.
-
-See the [architecture and decisions](docs/architecture.md) for rules and scope, and the [pilot runbook](docs/pilot.md) for rollback and the production approval gate.
-
-For the private hosted pilot, see [Render setup](docs/render.md).
+ChatGPT can send an email notification when the plan is ready. A complete coaching email from Gmail requires a Gmail send action available to your scheduled task. The full plan and check-in stay in ChatGPT either way. No separate hosting or paid service beyond your existing ChatGPT Plus subscription is required.
