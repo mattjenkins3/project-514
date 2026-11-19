@@ -17,7 +17,7 @@ The main climbing goal is to keep movement precise and efficient through the fin
 | 11 | 270 min | 10 mi | Return to route pairs with clean technique |
 | 12 | 180 min | 8 mi | Taper and use a rested assessment if appropriate |
 
-The default rhythm is technique or controlled bouldering Monday, an easy run and optional strength Tuesday, low-pump climbing Wednesday, running Thursday, full rest Friday, route work Saturday, and an easy run with a short review Sunday. Fridays stay off. Unfavorable or missing feedback can shorten, soften, or remove a session.
+The default rhythm is technique or controlled bouldering Monday, an easy run and optional strength Tuesday, low-pump climbing Wednesday, running Thursday, route work Friday, full rest Saturday, and an easy run with a short review Sunday. Keep Thursday's run easy when Friday is a demanding climbing day. Saturdays stay off. Unfavorable or missing feedback can shorten, soften, or remove a session.
 
 The coach never adds work to make up a missed day. It avoids hard finger sessions closer than 48 hours, automatic fingerboard work, and intense running without clearance. Stop painful activity. Significant or worsening symptoms require review before a return. New or concerning chest or breathing symptoms warrant urgent medical help.
 

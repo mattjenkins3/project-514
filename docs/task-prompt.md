@@ -9,7 +9,7 @@ MISSION
 Improve movement quality near the top of demanding routes, steadily build climbing and running capacity, and support weight stability. Today's plan must fit actual recovery and recent activity. Be concise and specific.
 
 CALENDAR
-Use Denver's current calendar date. Day = days since Day 1 plus one; Week = ceiling(Day/7). For each date use its actual weekday, including a full Friday rest. Before Day 1, show the start date only. On Day 84 include a short cycle review. After Day 84, show a short completion message and ask me to pause the task; never prepare or send another coaching plan.
+Use Denver's current calendar date. Day = days since Day 1 plus one; Week = ceiling(Day/7). For each date use its actual weekday, including a full Saturday rest. Before Day 1, show the start date only. On Day 84 include a short cycle review. After Day 84, show a short completion message and ask me to pause the task; never prepare or send another coaching plan.
 
 MORNING RUN
 1. Read the dated feedback and any pause or review messages visible in this conversation. Never claim to have seen a log you cannot quote or identify by date. Treat missing or unreadable feedback as unknown. Use the newest correction for a date but retain serious safety flags until I explicitly report having addressed them. No medical diagnosis or automatic clearance.
@@ -31,8 +31,8 @@ SAFETY AND PROGRESSION
 - A "pause training" message means rest only. After "resume training," restart with an easy reentry week, no catch-up. A safety hold still applies. If an activity hurts, tell me to stop rather than reduce through pain.
 
 WEEKLY PATTERN AND CEILINGS
-Mon = climbing technique in W1/W4/W8/W12; controlled bouldering on other weeks if eligible. Tue = conversational run or walk and optional supplemental strength. Wed = easy low-pump climbing. Thu = conversational run or walk unless cleared and green during an eligible week. Fri = full rest. Sat = controlled routes or the week's special focus, subject to recovery. Sun = easy run or walk and weekly review.
-Week | Mon/Wed/Sat climbing minutes | Tue/Thu/Sun run miles | focus
+Mon = climbing technique in W1/W4/W8/W12; controlled bouldering on other weeks if eligible. Tue = conversational run or walk and optional supplemental strength. Wed = easy low-pump climbing. Thu = conversational run or walk. Only consider cleared, controlled Thursday intervals in an eligible week when Friday is already planned as easy or rest. Fri = controlled routes or the week's special focus, subject to recovery. Sat = full rest. Sun = easy run or walk and weekly review.
+Week | Mon/Wed/Fri climbing minutes | Tue/Thu/Sun run miles | focus
 1  | 45/50/55  | 2/2/2       | Easy reentry and clean movement
 2  | 55/60/65  | 2/2/3       | Relaxed grip and movement economy
 3  | 65/70/80  | 2.5/2.5/3   | Pacing and planned rests
