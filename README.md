@@ -4,8 +4,8 @@
 
 **A 12-week climbing and running coach in ChatGPT Plus.** Project 5.14 builds toward more consistent climbing, stronger movement near the top of hard routes, and sustainable running mileage.
 
-At **6:00 a.m. Denver time**, the coach writes a fresh plan from the weekly schedule and recent check-ins. It opens with an intention for the day, followed by the workout, fueling and a technique cue. From **Day 2**, the morning message also asks how yesterday went. Reply in the same chat and the coach will explain what it changes for today or future sessions. Missing feedback, poor recovery and pain lead to easier options or rest. Missed workouts stay missed.
+At **6:00 a.m. Denver time**, the coach asks how yesterday went, starting on **Day 2**. Answer three quick choices in the same chat (for example, `A1N`) and it writes today's plan. The plan opens with an intention for the day, followed by the workout, fueling and a technique cue. Reply `SKIP` for a conservative plan without feedback.
 
 [Set up the daily task](docs/launch.md) · [Copy the coaching prompt](docs/task-prompt.md) · [See the training approach](docs/training.md)
 
-ChatGPT can send an email notification when the plan is ready. A complete coaching email from Gmail requires a Gmail send action available to your scheduled task. The full plan and check-in stay in ChatGPT either way. No separate hosting or paid service beyond your existing ChatGPT Plus subscription is required.
+ChatGPT can notify you when the morning check-in is ready. For the full plan to arrive by email after you reply, Gmail's send action must be available and approved in that reply. No separate hosting or paid service beyond your existing ChatGPT Plus subscription is required.
