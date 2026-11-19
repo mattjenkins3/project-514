@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Morning check-in | Project 5.14</title>
+<style>
+:root{color-scheme:dark;background:#11241e;color:#f0efe3;font:16px/1.45 system-ui,sans-serif;--muted:#b5c8bc;--gold:#f7d37d;--line:#426052}
+*{box-sizing:border-box}body{margin:0}main{max-width:36rem;margin:auto;padding:1.75rem 1rem 3rem}header{margin-bottom:1.5rem}header p{margin:0;color:var(--muted)}.brand{color:var(--gold);letter-spacing:.14em;font-size:.78rem;font-weight:750}h1{font-size:clamp(2rem,7vw,3.25rem);line-height:1;letter-spacing:-.04em;margin:.55rem 0 .8rem}
+form,.summary{background:#1c342a;border:1px solid var(--line);border-radius:1.1rem;padding:1rem}fieldset{border:0;padding:0;margin:0 0 1.15rem;min-inline-size:0}legend,label{font-weight:650}legend{padding:0;margin-bottom:.48rem}.options{display:flex;flex-wrap:wrap;gap:.4rem}.option{position:relative;display:flex;flex:1 1 auto;align-items:center;justify-content:center;text-align:center;min-height:44px;min-width:4.4rem;padding:.3rem .62rem;border:1px solid var(--line);border-radius:.55rem;color:#e0e5d9;font-weight:620;cursor:pointer}.option:has(:checked){background:#344e3d;border-color:var(--gold);color:var(--gold)}.option input{position:absolute;opacity:0;width:100%;height:100%;inset:0;margin:0;cursor:pointer}.option:has(:focus-visible),:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.metrics{display:grid;grid-template-columns:minmax(6rem,1fr) minmax(0,2fr);gap:1rem;margin-bottom:1rem}.metrics label,.line label{display:block}.metrics input:not([type=range]),input[type=date],select,textarea{width:100%;min-height:44px;padding:.45rem .55rem;font:inherit;background:#132a21;border:1px solid var(--line);border-radius:.45rem;color:#f0efe3}input[type=date]{width:auto}input[type=range]{width:100%;height:2.75rem;margin:0;accent-color:var(--gold)}output,.hint{color:var(--muted);font-size:.86rem}.hint{margin:.25rem 0 0}.line{margin-bottom:1rem}button{width:100%;min-height:44px;border:0;border-radius:.55rem;background:var(--gold);color:#15271e;font:inherit;font-weight:780;cursor:pointer}button.secondary{background:transparent;border:1px solid var(--line);color:#e0e5d9;margin-top:.55rem}.summary{margin-top:1rem}.summary textarea{margin:.5rem 0 .7rem;min-height:6rem}.alert{color:#ffcfad;margin:.1rem 0 1rem}[hidden]{display:none!important}footer{margin-top:1rem;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand">PROJECT 5.14</div>
+  <h1>Morning check-in</h1>
+  <p>Tell your coach how yesterday went.</p>
+</header>
+<form id="check-in">
+  <div class="line"><label for="day">Session date</label><input id="day" name="day" type="date" required></div>
+  <fieldset>
+    <legend>How did it go?</legend>
+    <div class="options">
+      <label class="option"><input type="radio" name="outcome" value="Completed" required>Completed</label>
+      <label class="option"><input type="radio" name="outcome" value="Partial">Partial</label>
+      <label class="option"><input type="radio" name="outcome" value="Missed">Missed</label>
+      <label class="option"><input type="radio" name="outcome" value="Rest day">Rest day</label>
+    </div>
+  </fieldset>
+  <div id="work" hidden>
+    <fieldset>
+      <legend>What did you do?</legend>
+      <div class="options">
+        <label class="option"><input type="radio" name="activity" value="Climbing">Climb</label>
+        <label class="option"><input type="radio" name="activity" value="Running">Run</label>
+        <label class="option"><input type="radio" name="activity" value="Strength">Strength</label>
+        <label class="option"><input type="radio" name="activity" value="Other">Other</label>
+      </div>
+    </fieldset>
+    <div class="metrics">
+      <div><label for="dose" id="dose-label">Minutes</label><input id="dose" name="dose" type="number" min="0" max="999" step="1" inputmode="numeric" placeholder="Optional"></div>
+      <div><label for="effort">Overall effort <output id="effort-value" for="effort">Optional</output></label><input id="effort" type="range" min="1" max="10" value="5" aria-describedby="effort-value"><p class="hint">1 very easy · 10 maximal</p></div>
+    </div>
+    <div id="climb" hidden>
+      <div class="line"><label for="pump">Peak forearm pump <output id="pump-value" for="pump">Optional</output></label><input id="pump" type="range" min="0" max="10" value="5" aria-describedby="pump-value"></div>
+      <fieldset><legend>Technique in the final third <span class="hint">optional</span></legend><div class="options">
+        <label class="option"><input type="radio" name="technique" value="Steady">Steady</label>
+        <label class="option"><input type="radio" name="technique" value="Faded">Faded</label>
+        <label class="option"><input type="radio" name="technique" value="Stopped when movement broke down">Stopped</label>
+      </div></fieldset>
+    </div>
+    <fieldset id="run" hidden><legend>Could you speak in full sentences? <span class="hint">optional</span></legend><div class="options">
+      <label class="option"><input type="radio" name="talk" value="Yes">Yes</label>
+      <label class="option"><input type="radio" name="talk" value="No">No</label>
+    </div><p class="hint">For easy runs only.</p></fieldset>
+  </div>
+  <fieldset><legend>How do you feel this morning?</legend><div class="options">
+    <label class="option"><input type="radio" name="recovery" value="Recovered" required>Recovered</label>
+    <label class="option"><input type="radio" name="recovery" value="A little tired or sore">A little tired</label>
+    <label class="option"><input type="radio" name="recovery" value="Unusually tired or poorly recovered">Unusually tired</label>
+  </div></fieldset>
+  <fieldset><legend>Any new or unusual symptoms?</legend><div class="options">
+    <label class="option"><input type="radio" name="symptoms" value="None" required>None</label>
+    <label class="option"><input type="radio" name="symptoms" value="Mild discomfort">Mild discomfort</label>
+    <label class="option"><input type="radio" name="symptoms" value="Significant or worsening pain, or illness">Significant or ill</label>
+    <label class="option"><input type="radio" name="symptoms" value="Chest or breathing symptoms">Chest or breathing</label>
+  </div></fieldset>
+  <div id="area-row" class="line" hidden><label for="area">Where? <span class="hint">optional</span></label><select id="area" name="area"><option value="">Choose an area</option><option>Finger or hand</option><option>Shoulder or arm</option><option>Leg or foot</option><option>Other</option></select></div>
+  <p id="safety" class="alert" role="status" hidden></p>
+  <button>Copy check-in for ChatGPT</button>
+  <button id="skip" type="button" class="secondary">Skip check-in</button>
+</form>
+<section id="summary" class="summary" aria-labelledby="summary-title" hidden>
+  <label id="summary-title" for="reply">Your check-in</label>
+  <textarea id="reply" readonly></textarea>
+  <p id="status" role="status" class="hint"></p>
+  <button id="copy" type="button" class="secondary">Copy again</button>
+</section>
+<footer id="privacy">This form keeps answers in this tab. Paste your check-in into your existing Project 5.14 chat.</footer>
+</main>
+<script>
+const form = document.querySelector('#check-in');
+const byId = id => document.getElementById(id);
+const choice = name => new FormData(form).get(name);
+const touched = new Set();
+const dateParts = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Denver', year: 'numeric', month: '2-digit', day: '2-digit',
+}).formatToParts();
+const datePart = name => Number(dateParts.find(part => part.type === name).value);
+const yesterday = new Date(Date.UTC(datePart('year'), datePart('month') - 1, datePart('day') - 1))
+  .toISOString().slice(0, 10);
+byId('day').value = yesterday;
+byId('day').max = yesterday;
+
+function sync() {
+  const trained = ['Completed','Partial'].includes(choice('outcome'));
+  const activity = choice('activity');
+  const running = activity === 'Running';
+  const symptoms = choice('symptoms');
+  byId('work').hidden = !trained;
+  byId('climb').hidden = activity !== 'Climbing';
+  byId('run').hidden = !running;
+  for (const input of form.querySelectorAll('[name=activity]')) input.required = trained;
+  const dose = byId('dose');
+  if (dose.dataset.unit && dose.dataset.unit !== (running ? 'mi' : 'min')) dose.value = '';
+  dose.dataset.unit = running ? 'mi' : 'min';
+  dose.step = running ? '.01' : '1';
+  dose.inputMode = running ? 'decimal' : 'numeric';
+  dose.disabled = !trained;
+  byId('dose-label').textContent = running ? 'Miles' : 'Minutes';
+  byId('area-row').hidden = symptoms !== 'Mild discomfort';
+  const safety = byId('safety');
+  safety.textContent = symptoms === 'Chest or breathing symptoms'
+    ? 'Stop exercise. Seek urgent medical help for new or concerning symptoms. Call emergency services if symptoms are severe or ongoing.'
+    : symptoms === 'Significant or worsening pain, or illness'
+    ? 'Skip training and seek appropriate evaluation for significant or worsening symptoms.'
+    : '';
+  safety.hidden = !safety.textContent;
+}
+let lastActivity = null;
+form.addEventListener('change', event => {
+  if (event.target.name === 'activity') {
+    if (lastActivity && event.target.value !== lastActivity) {
+      byId('dose').value = '';
+      for (const id of ['effort','pump']) {
+        touched.delete(id);
+        byId(id).value = '5';
+        byId(id + '-value').textContent = 'Optional';
+      }
+      for (const input of form.querySelectorAll('[name=technique], [name=talk]')) input.checked = false;
+    }
+    lastActivity = event.target.value;
+  }
+  sync();
+});
+for (const id of ['effort','pump']) {
+  const slider = byId(id);
+  const update = () => {
+    touched.add(id);
+    byId(id + '-value').textContent = slider.value + '/10';
+  };
+  slider.addEventListener('input', update);
+  slider.addEventListener('change', update);
+}
+async function copy() {
+  const reply = byId('reply');
+  try {
+    await navigator.clipboard.writeText(reply.value);
+    byId('status').textContent = 'Copied. Paste it into your existing Project 5.14 chat.';
+  } catch {
+    reply.focus();
+    reply.select();
+    byId('status').textContent = 'Select and copy the text, then paste it into your Project 5.14 chat.';
+  }
+}
+form.addEventListener('submit', async event => {
+  event.preventDefault();
+  const outcome = choice('outcome');
+  const symptoms = choice('symptoms');
+  const activity = choice('activity');
+  const dose = byId('dose');
+  const reply = ['Project 5.14 check-in for ' + byId('day').value, outcome];
+  if (['Completed','Partial'].includes(outcome)) {
+    reply.push(activity);
+    if (dose.value) reply.push(dose.value + ' ' + dose.dataset.unit);
+    if (touched.has('effort')) reply.push('effort ' + byId('effort').value + '/10');
+    if (activity === 'Climbing' && touched.has('pump')) reply.push('peak pump ' + byId('pump').value + '/10');
+    if (activity === 'Climbing' && choice('technique')) reply.push('final-third technique: ' + choice('technique'));
+    if (activity === 'Running' && choice('talk')) reply.push('full sentences on easy run: ' + choice('talk'));
+  }
+  reply.push('morning recovery: ' + choice('recovery'), 'symptoms: ' + symptoms);
+  if (symptoms === 'Mild discomfort' && choice('area')) reply.push('area: ' + choice('area'));
+  await showReply(reply.join(' | ') + '. Please use this to generate my plan for today.');
+});
+async function showReply(text) {
+  byId('reply').value = text;
+  byId('summary').hidden = false;
+  await copy();
+  byId('summary').scrollIntoView({block:'nearest'});
+}
+byId('skip').addEventListener('click', async () => {
+  if (!byId('day').reportValidity()) return;
+  await showReply('Project 5.14 check-in for ' + byId('day').value
+    + ' | SKIP. Please generate a conservative plan for today without feedback.');
+});
+byId('copy').addEventListener('click', copy);
+</script>
+</body>
+</html>
