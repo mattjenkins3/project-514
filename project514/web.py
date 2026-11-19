@@ -1,6 +1,7 @@
 """Loopback-only synthetic check-in and preview UI."""
 import hmac
 import secrets
+from re import fullmatch
 from collections import deque
 from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
@@ -8,7 +9,7 @@ from html import escape
 from threading import Lock
 from time import monotonic
 from typing import Protocol
-from urllib.parse import parse_qsl, quote
+from urllib.parse import parse_qsl, quote, urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
@@ -163,23 +164,30 @@ def form(plan, values: dict, csrf: str, rev: int, saved: bool = False, error: st
 
 
 def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
-               clock: Callable[[], datetime] = lambda: datetime.now(UTC)) -> tuple[FastAPI, str]:
+               clock: Callable[[], datetime] = lambda: datetime.now(UTC), *,
+               hosted_password: bytes | None = None) -> tuple[FastAPI, str]:
+    hosted = hosted_password is not None
+    site_host = urlsplit(base_url).hostname
+    if hosted and (not site_host or not base_url.startswith("https://") or len(hosted_password) < 32):
+        raise ValueError("Hosted mode requires HTTPS and a strong sign-in secret.")
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost"])
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=[site_host] if hosted else ["127.0.0.1", "localhost"])
     bootstrap = secrets.token_urlsafe(32)
     dashboard = "dashboard"
     # Per-instance budget for authenticated mutations and capability exchanges.
     recent: deque[float] = deque()
     lock = Lock()
 
-    def rate_limit() -> None:
+    login_failures: deque[float] = deque()
+
+    def rate_limit(budget: deque[float] = recent) -> None:
         now = monotonic()
         with lock:
-            while recent and now - recent[0] >= 60:
-                recent.popleft()
-            if len(recent) >= 30:
+            while budget and now - budget[0] >= 60:
+                budget.popleft()
+            if len(budget) >= 30:
                 raise HTTPException(429, "Too many requests. Try again shortly.")
-            recent.append(now)
+            budget.append(now)
 
     @app.middleware("http")
     async def headers(request: Request, call_next):
@@ -190,6 +198,8 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
             "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
                                        "form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
         })
+        if hosted:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000"
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         return response
 
@@ -199,13 +209,16 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
     def get_session(request: Request, allowed: str = dashboard) -> str:
         token = request.cookies.get(COOKIE, "")
         if auth.verify(token, "session", clock()) not in {dashboard, allowed}:
-            raise HTTPException(403, "Open the local preview entry link or a valid check-in link.")
+            text = "Sign in to the private pilot." if hosted else (
+                "Open the local preview entry link or a valid check-in link."
+            )
+            raise HTTPException(403, text)
         return token
 
     def redirect_session(path: str, allowed: str) -> Response:
         response = RedirectResponse(path, status_code=303)
         response.set_cookie(COOKIE, auth.issue("session", allowed, clock(), SESSION_SECONDS),
-                            httponly=True, samesite="strict", max_age=SESSION_SECONDS)
+                            httponly=True, secure=hosted, samesite="strict", max_age=SESSION_SECONDS)
         return response
 
     def state():
@@ -213,15 +226,68 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
             return (coach.store.plans(db, coach.cycle.cycle_id),
                     latest_checkins(coach.store.history(db, coach.cycle.cycle_id)))
 
-    @app.get("/enter")
-    def enter(key: str = ""):
-        rate_limit()
-        if not key.isascii() or not hmac.compare_digest(key, bootstrap):
-            raise HTTPException(403, "Invalid local entry key.")
-        return redirect_session("/", dashboard)
+    async def read_form(request: Request) -> dict[str, str]:
+        if request.headers.get("origin", None if hosted else base_url) != base_url:
+            raise HTTPException(403, "Invalid form origin.")
+        if request.headers.get("content-type", "").split(";")[0] != "application/x-www-form-urlencoded":
+            raise HTTPException(415, "Expected form submission.")
+        body = bytearray()
+        async for chunk in request.stream():
+            if len(body) + len(chunk) > MAX_BODY:
+                raise HTTPException(413, "Form too large.")
+            body.extend(chunk)
+        try:
+            pairs = parse_qsl(body.decode("ascii"), keep_blank_values=True, strict_parsing=True,
+                              encoding="utf-8", errors="strict", max_num_fields=25)
+            values = dict(pairs)
+            if len(values) != len(pairs):
+                raise ValueError
+        except ValueError:
+            raise HTTPException(400, "Malformed form.") from None
+        return values
+
+    if hosted:
+        def destination(path: str) -> str:
+            return path if fullmatch(r"/check-in/[0-9]{4}-[0-9]{2}-[0-9]{2}", path) else "/"
+
+        @app.get("/healthz")
+        def health():
+            with coach.store.transaction() as db:
+                coach.store.cycle(db, coach.cycle.cycle_id)
+            return PlainTextResponse("ok")
+
+        @app.get("/login")
+        def login(next: str = "/"):
+            response = page("Project 5.14 sign in",
+                            '<p>Private pilot. Use synthetic check-ins.</p>'
+                            '<form method="post" action="/login">'
+                            f'<input type="hidden" name="next" value="{escape(destination(next))}">'
+                            '<label for="password">Pilot password</label>'
+                            '<input id="password" name="password" type="password" required '
+                            'autocomplete="current-password"><button type="submit">Sign in</button></form>')
+            response.headers["Referrer-Policy"] = "same-origin"
+            return response
+
+        @app.post("/login")
+        async def authenticate(request: Request):
+            values = await read_form(request)
+            supplied = values.get("password", "").encode()
+            if not hmac.compare_digest(supplied, hosted_password):
+                rate_limit(login_failures)
+                raise HTTPException(403, "Invalid pilot password.")
+            return redirect_session(destination(values.get("next", "/")), dashboard)
+    else:
+        @app.get("/enter")
+        def enter(key: str = ""):
+            rate_limit()
+            if not key.isascii() or not hmac.compare_digest(key, bootstrap):
+                raise HTTPException(403, "Invalid local entry key.")
+            return redirect_session("/", dashboard)
 
     @app.get("/")
     def index(request: Request):
+        if hosted and auth.verify(request.cookies.get(COOKIE, ""), "session", clock()) != dashboard:
+            return RedirectResponse("/login", 303)
         get_session(request)
         now = clock()
         today = now.astimezone(DENVER).date()
@@ -235,7 +301,7 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
             f'<a href="/check-in/{p.local_date}">Check-in</a></li>'
             for p in reversed(plans)
         )
-        return page("Project 5.14", '<p>Local coaching preview. Use synthetic entries only.</p>'
+        return page("Project 5.14", '<p>Coaching pilot preview. Use synthetic entries only.</p>'
                     f'<section class="card"><h2>Plan history</h2><ul>{rows}</ul></section>')
 
     @app.get("/email/{day}")
@@ -259,7 +325,9 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
     @app.get("/check-in/{day}")
     def checkin(day: date, request: Request, link: str = "", saved: bool = False):
         allowed = scope(day)
-        if link:
+        if hosted and auth.verify(request.cookies.get(COOKIE, ""), "session", clock()) != dashboard:
+            return RedirectResponse(f"/login?next=/check-in/{day}", 303)
+        if link and not hosted:
             rate_limit()
             if auth.verify(request.cookies.get(COOKIE, ""), "session", clock()) == dashboard:
                 return RedirectResponse(f"/check-in/{day}", status_code=303)
@@ -278,23 +346,7 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
         allowed = scope(day)
         token = get_session(request, allowed)
         rate_limit()
-        if request.headers.get("origin", base_url) != base_url:
-            raise HTTPException(403, "Invalid form origin.")
-        if request.headers.get("content-type", "").split(";")[0] != "application/x-www-form-urlencoded":
-            raise HTTPException(415, "Expected form submission.")
-        body = bytearray()
-        async for chunk in request.stream():
-            if len(body) + len(chunk) > MAX_BODY:
-                raise HTTPException(413, "Form too large.")
-            body.extend(chunk)
-        try:
-            pairs = parse_qsl(body.decode("ascii"), keep_blank_values=True, strict_parsing=True,
-                              encoding="utf-8", errors="strict", max_num_fields=25)
-            values = dict(pairs)
-            if len(values) != len(pairs):
-                raise ValueError
-        except ValueError:
-            raise HTTPException(400, "Malformed form.") from None
+        values = await read_form(request)
         csrf = values.pop("csrf", "")
         if not csrf.isascii() or not hmac.compare_digest(csrf, auth.csrf(token, allowed)):
             raise HTTPException(403, "Invalid form signature.")
@@ -314,4 +366,4 @@ def create_app(coach: Coach, auth: AuthenticationProvider, base_url: str,
                         error="Check the marked ranges and session outcome. If this form is stale, reload it.")
         return RedirectResponse(f"/check-in/{day}?saved=true", status_code=303)
 
-    return app, f"{base_url}/enter?key={quote(bootstrap)}"
+    return app, f"{base_url}/login" if hosted else f"{base_url}/enter?key={quote(bootstrap)}"

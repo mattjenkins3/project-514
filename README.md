@@ -35,3 +35,5 @@ Local controls affect future days. The review command records manual acknowledge
 The default local database is `.local/demo.sqlite3`. Pass `--db PATH` to use a separate synthetic sandbox. Stop the app before copying or removing a demo database. Keep local databases, terminal entry links, real athlete data, and preview artifacts out of source control.
 
 See the [architecture and decisions](docs/architecture.md) for rules and scope, and the [pilot runbook](docs/pilot.md) for rollback and the production approval gate.
+
+For the private hosted pilot, see [Render setup](docs/render.md).

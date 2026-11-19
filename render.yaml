@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: project514-pilot
+    runtime: python
+    plan: starter
+    numInstances: 1
+    autoDeployTrigger: "off"
+    buildCommand: python -m pip install -r requirements.txt
+    startCommand: python -m project514.hosted
+    healthCheckPath: /healthz
+    disk:
+      name: pilot-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.14
+      - key: PROJECT514_PILOT_START
+        sync: false
+      - key: PROJECT514_PILOT_PASSWORD
+        sync: false
+      - key: PROJECT514_SESSION_KEY
+        generateValue: true
