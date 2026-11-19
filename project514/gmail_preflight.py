@@ -12,17 +12,21 @@ SETTINGS = ("GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN",
             "GMAIL_SENDER", "GMAIL_RECIPIENT")
 
 
-def check(settings: Mapping[str, str], *, refresh: bool = False) -> str:
+def load_config(settings: Mapping[str, str]) -> GmailConfig:
     missing = [key for key in SETTINGS if not settings.get(key, "").strip()]
     if missing:
         raise ValueError("Missing settings: " + ", ".join(missing))
-    config = GmailConfig(
+    return GmailConfig(
         sender=settings["GMAIL_SENDER"].strip(),
         recipient=settings["GMAIL_RECIPIENT"].strip(),
         client_id=settings["GMAIL_CLIENT_ID"].strip(),
         client_secret=SecretStr(settings["GMAIL_CLIENT_SECRET"].strip()),
         refresh_token=SecretStr(settings["GMAIL_REFRESH_TOKEN"].strip()),
     )
+
+
+def check(settings: Mapping[str, str], *, refresh: bool = False) -> str:
+    config = load_config(settings)
     if not refresh:
         return "Required Gmail settings are present and addresses passed validation. No network request made."
     GmailEmail(config).preflight()
