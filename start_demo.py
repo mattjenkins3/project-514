@@ -39,7 +39,7 @@ def main():
         port = sock.getsockname()[1]
     print(f"Open http://127.0.0.1:{port}/ in Chrome. Keep this window open while using the app.", flush=True)
     subprocess.run([str(python), "-m", "streamlit", "run", "streamlit_app.py",
-                    "--server.address=127.0.0.1", f"--server.port={port}", "--server.headless=false",
+                    "--server.address=127.0.0.1", f"--server.port={port}", "--server.headless=false", "--server.showEmailPrompt=false",
                     "--browser.serverAddress=127.0.0.1", "--browser.gatherUsageStats=false"], check=True)
 
 
