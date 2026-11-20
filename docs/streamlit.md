@@ -36,7 +36,9 @@ Use **Profile → Prepare private JSON export** for a readable personal copy. Fo
 
 ## Try locally
 
-Use Python 3.12. From the repository root:
+Download and extract the beta source on the computer running Chrome. With Python 3.12 installed, open **Start Demo.command** on macOS or **Start Demo.cmd** on Windows. On Linux, run `python3 start_demo.py` from the extracted folder. The launcher installs dependencies into an isolated local environment, generates an app password on first use, and prints the local address. Copy the first-run password into the app. On later visits the same password is available in `.streamlit/secrets.toml`. Keep the launcher window open while using the app. Retain the extracted folder to keep the database.
+
+For manual setup with Python 3.12, run these commands from the repository root:
 
 ```sh
 python -m venv .venv
