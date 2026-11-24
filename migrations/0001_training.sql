@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS athlete (
+  id INTEGER PRIMARY KEY CHECK(id = 1),
+  revision INTEGER NOT NULL DEFAULT 0,
+  payload TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS login_attempt (
+  slot INTEGER PRIMARY KEY,
+  failures INTEGER NOT NULL,
+  expires INTEGER NOT NULL
+);
