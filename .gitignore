@@ -6,3 +6,5 @@ __pycache__/
 !.env.example
 .local/
 *.sqlite*
+.streamlit/secrets.toml
+*.sqlite3-*
