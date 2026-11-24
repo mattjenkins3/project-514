@@ -8,3 +8,8 @@ __pycache__/
 *.sqlite*
 .streamlit/secrets.toml
 *.sqlite3-*
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
+.wrangler-logs/

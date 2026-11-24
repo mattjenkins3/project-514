@@ -1,7 +1,6 @@
 import hashlib
 import hmac
 import json
-import secrets
 import sqlite3
 import time
 from datetime import date, datetime, timedelta
@@ -161,22 +160,11 @@ def profile_form(profile=None):
         st.rerun()
 
 
-@st.fragment(run_every="5min")
-def imported_minutes(yesterday):
-    with transaction(st.secrets) as db:
-        health = db.get("health", yesterday.isoformat())
-    if health and "workout_minutes" in health:
-        st.caption(
-            f"Apple Health reported {health['workout_minutes']} workout minutes. Confirm what you actually did below."
-        )
-
-
 def checkin(day, previous_plan, saved):
     yesterday = day - timedelta(days=1)
     st.subheader(f"How did {yesterday:%A, %b %d} go?")
     if previous_plan:
         st.caption(f"Planned · {previous_plan['title']} · {previous_plan['minutes']} min")
-    imported_minutes(yesterday)
     options = ["Completed", "Partial", "Missed", "Rested"]
     prior = saved or {}
 
@@ -329,14 +317,6 @@ def today(profile, day):
 
 
 @st.fragment(run_every="5min")
-def health_summary(key):
-    with transaction(st.secrets) as db:
-        health = db.recent("health", key, 28)
-    if health:
-        st.subheader("Apple Health summaries")
-        st.dataframe([{"Date": d, **v} for d, v in health.items()], hide_index=True)
-
-
 def progress(profile, day):
     key = day.isoformat()
     with transaction(st.secrets) as db:
@@ -385,7 +365,6 @@ def progress(profile, day):
     if benchmarks:
         st.subheader("Benchmark history")
         st.dataframe([{"Date": d, **v} for d, v in benchmarks.items()], hide_index=True)
-    health_summary(key)
     if logs:
         st.subheader("Recent check-ins")
         st.dataframe([{"Date": d, **v} for d, v in logs.items()], hide_index=True)
@@ -396,7 +375,6 @@ def preferences(profile, day):
     st.subheader("Training status")
     with transaction(st.secrets) as db:
         hold = db.get("hold")
-        phone = db.get("phone")
     if hold:
         st.warning(hold["message"])
         reviewed = st.checkbox("I have addressed this concern and am ready for an easy return.")
@@ -417,33 +395,6 @@ def preferences(profile, day):
             db.put("profile", "", p)
             db.remove("plan", day.isoformat())
         st.rerun()
-    st.subheader("Apple Health")
-    st.write(
-        "Your iPhone can send dated workout minutes and measured VO₂ max directly to your database. Your daily check-in confirms recovery and effort."
-    )
-    if st.secrets.get("DATABASE_URL"):
-        enabled = st.toggle("Allow iPhone Shortcut imports", value=bool(phone))
-        if enabled != bool(phone):
-            with transaction(st.secrets, True) as db:
-                if enabled:
-                    token = secrets.token_urlsafe(32)
-                    db.put("phone", "", {"digest": hashlib.sha256(token.encode()).hexdigest()})
-                    st.session_state.phone_token = token
-                else:
-                    db.remove("phone")
-                    st.session_state.pop("phone_token", None)
-            st.rerun()
-        if phone:
-            if "phone_token" in st.session_state:
-                st.caption("Copy the import token to your private Shortcut. Signing out clears this display.")
-                st.code(st.session_state.phone_token)
-            st.caption("Turn imports off to revoke the token. Turn them back on for a new token.")
-            with st.expander("Set up the iPhone Shortcut"):
-                st.markdown((ROOT / "docs/apple-health.md").read_text())
-    else:
-        st.caption(
-            "Automatic imports need the hosted database. You can enter measured VO₂ max in Progress here."
-        )
     st.subheader("Your data")
     if st.button("Prepare private JSON export"):
         with transaction(st.secrets) as db:
@@ -461,6 +412,7 @@ def preferences(profile, day):
 
 def main():
     authenticate()
+    st.caption("Streamlit beta archive · Use the Cloudflare edition for the 12-week calendar. You can export this log in Profile.")
     with st.sidebar:
         st.image(str(ROOT / "assets/project-514.svg"), width=210)
         view = st.radio("Training log", ["Today", "Progress", "Profile"])
