@@ -1,6 +1,6 @@
 # Moving from the Streamlit beta
 
-The current training app runs on Cloudflare Workers with a private D1 database. Follow the [setup and migration instructions](../README.md) to create your own deployment or open the local version.
+The current training app runs on Cloudflare Workers with a private D1 database. Follow the [current setup instructions](../../../README.md) to create your own deployment or open the local version. See [archive migration instructions](../../README.md) for old logs.
 
 If you used the local Streamlit app, run the current local launcher from the same folder to reuse its password and copy its log. A hosted Streamlit user can download a private JSON export from the old Profile page and import it into an empty D1 deployment. Store personal exports outside version control.
 

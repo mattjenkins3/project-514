@@ -1,7 +1,7 @@
 // Convert a private beta JSON export on stdin to a single insert-only D1 statement.
 import { readFileSync } from "node:fs";
-import { importBeta } from "./actions.js";
-import { todayIn } from "../web/model.js";
+import { importBeta } from "../../../worker/actions.js";
+import { todayIn } from "../../../web/model.js";
 const data = JSON.parse(readFileSync(0, "utf8"));
 const zone =
   data.profile?.[""]?.zone || Intl.DateTimeFormat().resolvedOptions().timeZone;

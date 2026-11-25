@@ -40,7 +40,7 @@ def main():
             data = {}
             for kind, day, payload in rows:
                 data.setdefault(kind, {})[day] = json.loads(payload)
-        sql = subprocess.run([node, "worker/import-beta.js"], input=json.dumps(data), text=True,
+        sql = subprocess.run([node, "archive/streamlit/worker/import-beta.js"], input=json.dumps(data), text=True,
                              capture_output=True, check=True).stdout
         if sql:
             with tempfile.NamedTemporaryFile(dir=".local", suffix=".sql", mode="w", delete=False) as tmp:
