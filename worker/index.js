@@ -1,4 +1,4 @@
-import { fresh, todayIn } from "../web/model.js";
+import { fresh, todayIn, buildPlan } from "../web/model.js";
 import { apply, InputError, zoneName } from "./actions.js";
 
 const enc = new TextEncoder();
@@ -25,8 +25,11 @@ async function sessionKey(password) {
     ["sign", "verify"],
   );
 }
-async function issue(password) {
-  const payload = String(Date.now() + 12 * 3600000) + "." + crypto.randomUUID();
+async function issue(password, browserSession = false) {
+  const payload =
+    (browserSession ? "session" : String(Date.now() + 12 * 3600000)) +
+    "." +
+    crypto.randomUUID();
   const sig = await crypto.subtle.sign(
     "HMAC",
     await sessionKey(password),
@@ -35,9 +38,23 @@ async function issue(password) {
   return payload + "." + hex(sig);
 }
 async function authorized(request, password) {
-  const token = request.headers.get("Authorization") || "";
-  const match = /^Bearer (\d{13}\.[a-f0-9-]{36})\.([a-f0-9]{64})$/.exec(token);
-  if (!match || Number(match[1].split(".")[0]) < Date.now()) return false;
+  const cookie = request.headers
+    .get("Cookie")
+    ?.split(";")
+    .map((v) => v.trim())
+    .find((v) => v.startsWith("p514_session="))
+    ?.slice(13);
+  const token = cookie
+    ? "Bearer " + cookie
+    : request.headers.get("Authorization") || "";
+  const match =
+    /^Bearer ((?:session|\d{13})\.[a-f0-9-]{36})\.([a-f0-9]{64})$/.exec(token);
+  if (
+    !match ||
+    (match[1].split(".")[0] !== "session" &&
+      Number(match[1].split(".")[0]) < Date.now())
+  )
+    return false;
   return crypto.subtle.verify(
     "HMAC",
     await sessionKey(password),
@@ -45,7 +62,7 @@ async function authorized(request, password) {
     enc.encode(match[1]),
   );
 }
-async function login(db, password, supplied, ip) {
+async function login(db, password, supplied, ip, secure) {
   const hash = new Uint8Array(
     await crypto.subtle.digest("SHA-256", enc.encode(ip)),
   );
@@ -71,7 +88,21 @@ async function login(db, password, supplied, ip) {
   if (!crypto.subtle.timingSafeEqual(expected, actual))
     return json({ error: "That password didn’t match." }, 401);
   await db.prepare("DELETE FROM login_attempt WHERE slot=?").bind(slot).run();
-  return json({ token: await issue(password) });
+  const response = json({ token: await issue(password) });
+  response.headers.set(
+    "Set-Cookie",
+    sessionCookie(await issue(password, true), secure),
+  );
+  return response;
+}
+function sessionCookie(value, secure, clear = false) {
+  return (
+    "p514_session=" +
+    value +
+    "; Path=/api; HttpOnly; SameSite=Strict" +
+    (secure ? "; Secure" : "") +
+    (clear ? "; Max-Age=0" : "")
+  );
 }
 export default {
   async fetch(request, env) {
@@ -98,6 +129,14 @@ export default {
         !request.headers.get("Content-Type")?.startsWith("application/json")
       )
         return json({ error: "JSON required." }, 415);
+      if (url.pathname === "/api/logout" && post) {
+        const response = json({ ok: true });
+        response.headers.set(
+          "Set-Cookie",
+          sessionCookie("", url.protocol === "https:", true),
+        );
+        return response;
+      }
       if (url.pathname === "/api/login" && post) {
         const body = await request.json();
         return login(
@@ -105,6 +144,7 @@ export default {
           env.APP_PASSWORD,
           body.password,
           request.headers.get("CF-Connecting-IP") || "local",
+          url.protocol === "https:",
         );
       }
       if (!(await authorized(request, env.APP_PASSWORD)))
@@ -118,6 +158,11 @@ export default {
         "SELECT revision,payload FROM athlete WHERE id=1",
       ).first();
       const s = row ? JSON.parse(row.payload) : fresh();
+      if (s.profile && (s.plannerVersion || 0) < 6)
+        buildPlan(
+          s,
+          todayIn(s.profile.zone === "auto" ? browserZone : s.profile.zone),
+        );
       let rev = row?.revision || 0;
       if (post) {
         const body = await request.json();

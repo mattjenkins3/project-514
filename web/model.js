@@ -1,3 +1,4 @@
+import { strengthSession } from "./strength.js";
 export const DAYS = [
   "Sunday",
   "Monday",
@@ -106,9 +107,10 @@ export function defaults() {
     goalVo2: null,
     hang: "",
     strength: "",
-    fuelRest: "",
-    fuelModerate: "",
-    fuelHard: "",
+    fuelCarbs: null,
+    fuelProtein: null,
+    fuelFat: null,
+    fuelCalories: null,
   };
 }
 export const dayAdd = (day, n) =>
@@ -189,6 +191,7 @@ const cues = [
   "Revisit your benchmark under similar conditions.",
 ];
 export function buildPlan(s, from) {
+  s.plannerVersion = 6;
   const p = s.profile;
   const reports = Object.entries(s.feedback).sort(([a], [b]) =>
     b.localeCompare(a),
@@ -226,7 +229,9 @@ export function buildPlan(s, from) {
     const reentry = s.reentryUntil && day <= s.reentryUntil;
     const recovering = ease || reentry;
     const deload = [3, 7, 11].includes(w);
-    const scale = [0.8, 0.9, 1, 0.7, 0.9, 0.95, 1, 0.7, 0.95, 1, 1, 0.8][w];
+    const scale = [
+      0.9, 0.97, 1.03, 0.72, 0.98, 1.04, 1.12, 0.77, 1.02, 1.08, 1.02, 0.82,
+    ][w];
     const plan = {
       kind,
       week: w + 1,
@@ -268,22 +273,40 @@ export function buildPlan(s, from) {
           wd === Math.max(...p.climbDays);
         plan.title = practice
           ? "Project sequence practice"
-          : "Technique & easy laps";
+          : deload || recovering
+            ? "Easy recovery laps"
+            : [
+                "Footwork & easy laps",
+                "Pacing on familiar routes",
+                "Route reading practice",
+              ][
+                p.climbDays
+                  .slice()
+                  .sort((a, b) => a - b)
+                  .indexOf(wd) % 3
+              ];
         plan.route = practice ? p.grade : Math.max(0, p.grade - 2);
         plan.cue =
           cues[w] +
           " Warm up gradually, alternate movement with rests, and finish with easy climbing.";
         if (
           p.hang &&
+          p.hang !== HANG[0] &&
           !recovering &&
           !deload &&
-          wd === Math.min(...p.climbDays)
+          (p.hang !== HANG[1] || wd === Math.min(...p.climbDays))
         ) {
           const label =
-            p.hang === HANG[2] ? (w % 2 ? HANG[1] : HANG[0]) : p.hang;
+            p.hang === HANG[2]
+              ? wd === Math.min(...p.climbDays) && w > 0
+                ? HANG[1]
+                : HANG[0]
+              : p.hang;
           plan.extras.push(
             label +
-              " · Optional. Use your established routine after warming up, within the session time. Skip if your fingers feel sore.",
+              (label === HANG[0]
+                ? " · Optional 10 minutes, feet supported, light finger tension. Separate from climbing or another finger session by at least six hours. Skip sore days."
+                : " · For experienced hangboarders: after warming up, three controlled 7–10 second efforts on a familiar edge, with three minutes of rest. Replace hard route attempts that day. Stop before grip form slips."),
           );
         }
       } else {
@@ -319,30 +342,33 @@ export function buildPlan(s, from) {
           plan.cue +=
             " Track how the same comfortable pace feels at your next aerobic benchmark.";
       }
-      if (
-        p.strength &&
-        !recovering &&
-        !deload &&
-        wd ===
-          (p.sportDays.length
-            ? Math.min(...p.sportDays)
-            : Math.max(...p.climbDays))
-      ) {
+      if (p.hang === HANG[0]) {
         plan.extras.push(
-          p.strength === STRENGTH[0]
-            ? "Strength · Rows, push-ups and dead bugs, then one easy set of split squats."
-            : "Strength · Include rows and side planks. Spend the larger share on split squats, hip hinges, step-ups and calf raises.",
+          HANG[0] +
+            " · Two 10-minute sessions today, at least six hours apart and separated from climbing or heavy finger training by six hours. Keep feet supported and tension light. Skip if fingers hurt or remain sore.",
         );
       }
     }
-    plan.fuel =
-      p[
-        plan.kind === "Rest"
-          ? "fuelRest"
-          : plan.title === "Project sequence practice"
-            ? "fuelHard"
-            : "fuelModerate"
-      ];
+    if (
+      p.strength &&
+      kind !== "Climb" &&
+      !s.paused &&
+      !s.hold &&
+      !s.rest[day]
+    ) {
+      plan.strengthRecovery = recovering || deload;
+      plan.strength = strengthSession(p, day, plan, s.plans);
+      plan.extras.push(
+        p.strength === STRENGTH[0]
+          ? "Strength · Rows, push-ups and dead bugs, then one easy set of split squats."
+          : "Strength · Include rows and side planks. Spend the larger share on split squats, hip hinges, step-ups and calf raises.",
+      );
+      if (plan.kind === "Rest") {
+        plan.title = "Strength & recovery";
+        plan.cue =
+          "Complete the strength work below, then recover. No climbing or cardio is scheduled.";
+      }
+    }
     s.plans[day] = plan;
   }
 }

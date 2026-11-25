@@ -209,13 +209,24 @@ export function profileFields(p, browserZone, review = false) {
         true,
       ),
   );
+  const timeline = (key) =>
+    field(
+      "Goal timeline · preferred date",
+      '<input type="date" name="' +
+        key +
+        '" value="' +
+        esc(p[key] || "") +
+        '">',
+      "Choose a date to aim for. Your benchmark trend updates the estimate as you train.",
+    );
   html += section(
     "Climbing",
-    grade(
-      "grade",
-      "Current repeatable route grade",
-      "Choose a grade you can climb consistently.",
-    ) +
+    timeline("climbGoalDate") +
+      grade(
+        "grade",
+        "Current repeatable route grade",
+        "Choose a grade you can climb consistently.",
+      ) +
       grade(
         "target",
         "Goal route grade",
@@ -246,6 +257,7 @@ export function profileFields(p, browserZone, review = false) {
   );
   if (sport) {
     aerobic +=
+      timeline("sportGoalDate") +
       weekdays(
         "sportDays",
         sport + " days",
@@ -329,19 +341,39 @@ export function profileFields(p, browserZone, review = false) {
       ),
   );
   html +=
+    '<p class="profile-evidence"><a href="/research.html#strength" target="_blank" rel="noopener">How strength progresses and balances recovery ↗</a></p>' +
     "<details><summary>Personal fueling references (optional)</summary>" +
     section(
       "Fueling references",
-      ["Rest", "Moderate", "Hard"]
-        .map((level) =>
-          txt(
-            "fuel" + level,
-            level + " day",
-            "Your own meal or macro reminder, for example pack a snack for the wall.",
-            120,
-          ),
-        )
-        .join(""),
+      "<p>Optional daily targets you choose yourself. Leave all four blank to hide fueling guidance from the calendar.</p>" +
+        num(
+          "fuelCarbs",
+          "Carbohydrates · g/day",
+          "Your daily carbohydrate target in grams, for example 250.",
+          0,
+          3000,
+        ) +
+        num(
+          "fuelProtein",
+          "Protein · g/day",
+          "Your daily protein target in grams, for example 120.",
+          0,
+          1000,
+        ) +
+        num(
+          "fuelFat",
+          "Fat · g/day",
+          "Your daily fat target in grams, for example 70.",
+          0,
+          1000,
+        ) +
+        num(
+          "fuelCalories",
+          "Total calories · kcal/day",
+          "Your daily calorie target, for example 2400. This is a personal reference.",
+          0,
+          20000,
+        ),
     ) +
     "</details>";
   if (review)

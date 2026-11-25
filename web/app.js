@@ -1,3 +1,6 @@
+import { startIntro } from "./intro.js";
+import { sessionBrief } from "./session.js";
+import { outlook } from "./outlook.js";
 import {
   defaults,
   dayAdd,
@@ -48,7 +51,8 @@ let token = "",
   modal = "",
   editing = "",
   busy = false,
-  noticeTimer;
+  noticeTimer,
+  introPending = false;
 let defaultDisplay = defaults(),
   checkDay = "",
   displayEdits = {};
@@ -58,6 +62,12 @@ function toast(text) {
   noticeTimer = setTimeout(() => ($("#message").textContent = ""), 4200);
 }
 function lock() {
+  fetch("/api/logout", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  }).catch(() => {});
   token = "";
   state = null;
   draft = null;
@@ -72,6 +82,7 @@ function lock() {
   loginView();
 }
 function loginView() {
+  $("#site-nav").innerHTML = "";
   top.innerHTML = preferences(defaultDisplay);
   main.innerHTML =
     '<section class="login panel"><img src="/project-514.svg" alt="Project 5.14 climbing training"><h1>Open your training log</h1><form id="login">' +
@@ -86,6 +97,7 @@ async function api(path, body) {
   const response = await fetch("/api/" + path, {
     method: body ? "POST" : "GET",
     cache: "no-store",
+    credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
@@ -130,7 +142,7 @@ function startView() {
   }
   if (!selected) selected = withinBlock(today);
   render();
-  if (view !== "Profile") prompts();
+  if (view !== "Profile" && !introPending) prompts();
 }
 function withinBlock(d) {
   return !state?.start
@@ -206,67 +218,308 @@ function render() {
       : "") +
     btn("Lock app", "lock") +
     "</nav>";
+  $("#site-nav").innerHTML = nav;
   main.innerHTML =
-    nav +
     (view === "Profile"
       ? profileView()
       : view === "Progress"
         ? progressView()
-        : calendarView()) +
-    '<p class="error" role="alert"></p>';
+        : calendarView()) + '<p class="error" role="alert"></p>';
 }
 function metric(key, val) {
   const [suffix, factor] = unit(key, state.profile);
   return Number((val / factor).toFixed(1)) + " " + suffix;
 }
+function brief(label, text) {
+  return (
+    "<section><h3>" + esc(label) + "</h3><p>" + esc(text) + "</p></section>"
+  );
+}
 function workout(d) {
   const plan = state.plans[d],
     r = state.feedback[d];
   if (!plan) return "";
-  const tag = (s) => '<span class="tag">' + esc(s) + "</span>";
-  const tags = [plan.kind, plan.minutes + " min", plan.phase];
+  const briefing = sessionBrief(plan);
+  const tags = [
+    plan.kind === "Rest" && plan.extras?.some((x) => x.startsWith("Strength"))
+      ? "Strength"
+      : plan.kind,
+    plan.minutes + " min",
+  ];
   if (plan.route != null)
     tags.push("Routes around " + gradeName(plan.route, state.profile));
   if (plan.distance != null) tags.push(metric("volume", plan.distance));
   if (plan.gain != null) tags.push(metric("gain", plan.gain) + " ascent");
-  return (
-    '<article class="panel work"><p class="kicker">' +
-    esc(dateLabel(d, { weekday: "long", month: "long", day: "numeric" })) +
-    "</p><h2>" +
-    esc(plan.title) +
-    '</h2><div class="tags">' +
-    tags.map(tag).join("") +
-    "</div><p>" +
-    esc(plan.cue) +
-    "</p>" +
-    (plan.extras || []).map((x) => "<p>" + esc(x) + "</p>").join("") +
-    (plan.reason ? '<p class="muted">' + esc(plan.reason) + "</p>" : "") +
-    (plan.fuel ? "<p>Fueling · " + esc(plan.fuel) + "</p>" : "") +
-    (d < today || r
-      ? "<p><strong>" +
-        esc(r ? r.outcome : "Assumed completed as directed") +
-        "</strong>" +
-        esc(r?.note ? " · " + r.note : "") +
-        "</p>"
-      : "") +
-    '<div class="actions">' +
+  const actions =
     (d <= today
       ? btn(
           r ? "Edit feedback" : "Report performance",
           "report",
-          "",
+          "primary",
           "data-day=" + d,
         )
       : "") +
-    (d === today && plan.kind !== "Rest" ? btn("Rest today", "rest") : "") +
-    "</div></article>"
+    (d === today && plan.kind !== "Rest"
+      ? btn("Rest today", "rest", "quiet")
+      : "");
+  const descriptions = [briefing.warmup, briefing.session, briefing.cooldown];
+  const stages = briefing.phases
+    .map(
+      ([minutes, label], i) =>
+        '<li><div class="stage-heading"><strong>' +
+        esc(label) +
+        "</strong><span>" +
+        minutes +
+        " min</span></div><p>" +
+        esc(descriptions[i]) +
+        "</p></li>",
+    )
+    .join("");
+  const extras = (plan.extras || [])
+    .slice()
+    .sort(
+      (a, b) =>
+        Number(b.startsWith("Strength")) - Number(a.startsWith("Strength")),
+    )
+    .map((x) => {
+      if (x.startsWith("Strength")) {
+        const strength = plan.strength;
+        if (!strength)
+          return (
+            '<section class="training-extra"><h3>Strength</h3><p>' +
+            esc(x.split(" · ").slice(1).join(" · ")) +
+            "</p></section>"
+          );
+        return (
+          '<section class="training-extra strength-plan"><div class="strength-heading"><h3>' +
+          esc(strength.title) +
+          "</h3><span>About " +
+          strength.minutes +
+          " min · " +
+          esc(strength.phase) +
+          "</span></div><p>" +
+          esc(strength.context) +
+          "</p><p>" +
+          esc(strength.effort) +
+          "</p><ul>" +
+          strength.exercises
+            .map(
+              (e) =>
+                "<li><strong>" +
+                esc(e.name) +
+                "</strong><span>" +
+                esc(e.dose) +
+                "</span><p>" +
+                esc(e.cue) +
+                "</p></li>",
+            )
+            .join("") +
+          '</ul><p class="progression">' +
+          esc(strength.progression) +
+          '</p><a href="/research.html#strength">Why this session · strength evidence ↗</a></section>'
+        );
+      }
+      return (
+        '<section class="training-extra"><h3>' +
+        esc(x.split(" · ")[0].replace("Abrahamson-Baar", "Abrahamsson–Baar")) +
+        "</h3><p>" +
+        esc(x.split(" · ").slice(1).join(" · ")) +
+        "</p>" +
+        (x.includes("No Hang")
+          ? '<ul><li>Morning — 10 minutes of light, feet-supported pulls.</li><li>Evening — repeat the 10-minute routine, at least six hours later.</li><li>Each repetition is 10 seconds pulling, then 20 seconds off. Never add bodyweight hanging to this light routine.</li></ul><a href="/research.html#abrahangs">See the exact 10-minute sequence ↗</a>'
+          : "") +
+        "</section>"
+      );
+    })
+    .join("");
+  const fuelingTargets = [
+    ["fuelCarbs", "Carbohydrates", "g"],
+    ["fuelProtein", "Protein", "g"],
+    ["fuelFat", "Fat", "g"],
+    ["fuelCalories", "Total calories", "kcal"],
+  ].filter(([key]) => state.profile[key] != null && state.profile[key] !== "");
+  const fueling = fuelingTargets.length
+    ? "<section><h3>Your daily fueling references</h3><ul>" +
+      fuelingTargets
+        .map(
+          ([key, label, unit]) =>
+            "<li>" +
+            label +
+            " · " +
+            esc(state.profile[key]) +
+            " " +
+            unit +
+            "</li>",
+        )
+        .join("") +
+      "</ul><p>These are your daily targets, including meals and snacks.</p></section>"
+    : "";
+  return (
+    '<article class="work session-first"><header class="work-heading"><p class="dateline">' +
+    esc(dateLabel(d, { weekday: "long", month: "long", day: "numeric" })) +
+    "</p><h2>" +
+    esc(plan.title) +
+    '</h2><p class="session-meta">' +
+    tags.map(esc).join(" · ") +
+    '</p></header><section class="session-plan"><h3>Session plan</h3>' +
+    (stages
+      ? '<ol class="session-stages">' + stages + "</ol>"
+      : "<p>" + esc(briefing.session) + "</p>") +
+    '<div class="actions">' +
+    actions +
+    '</div></section><aside class="session-guidance">' +
+    brief("Today’s focus", briefing.cue) +
+    brief("This week", briefing.theme) +
+    fueling +
+    '<p class="evidence-note">Work and rest intervals are coaching starting points. Adjust using your feedback.</p><a href="/research.html">Training research ↗</a></aside>' +
+    (d < today || r
+      ? '<p class="report-status">' +
+        esc(r ? r.outcome : "Assumed completed as directed") +
+        "</p>"
+      : "") +
+    (extras ? '<div class="session-extras">' + extras + "</div>" : "") +
+    "</article>"
   );
 }
+function volumeChart(active) {
+  const weeks = Array.from({ length: 12 }, (_, i) => {
+    const days = Array.from(
+      { length: 7 },
+      (_, j) => state.plans[dayAdd(state.start, i * 7 + j)],
+    );
+    const climbing = days.reduce(
+      (n, p) => n + (p.kind === "Climb" ? p.minutes : 0),
+      0,
+    );
+    const cardio = days.reduce(
+      (n, p) => n + (!["Rest", "Climb"].includes(p.kind) ? p.minutes : 0),
+      0,
+    );
+    return { climbing, cardio, total: climbing + cardio, phase: days[0].phase };
+  });
+  const max = Math.max(1, ...weeks.map((w) => w.total)),
+    width = 320,
+    height = 150;
+  const x = (i) => 24 + (i * 270) / 11,
+    y = (n) => 111 - (n / max) * 83;
+  const points = weeks.map((w, i) => x(i) + "," + y(w.total)).join(" ");
+  const graph =
+    '<svg viewBox="0 0 320 150" role="group" aria-label="Weekly climbing and cardio minutes">' +
+    '<path d="M24 111H300" stroke="#b9c2bb" fill="none"/>' +
+    '<polygon points="24,111 ' +
+    points +
+    ' 294,111" fill="url(#volume-fill)"/><defs><linearGradient id="volume-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f2cf1b" stop-opacity=".5"/><stop offset="1" stop-color="#f2cf1b" stop-opacity=".05"/></linearGradient></defs>' +
+    '<polyline points="' +
+    points +
+    '" fill="none" stroke="#176379" stroke-width="2.5" stroke-linejoin="round"/>' +
+    weeks
+      .map(
+        (w, i) =>
+          '<g class="volume-point" tabindex="0" role="img" aria-label="Week ' +
+          (i + 1) +
+          ", " +
+          esc(w.phase) +
+          ", " +
+          w.climbing +
+          " climbing minutes, " +
+          w.cardio +
+          ' cardio minutes" data-volume-week="' +
+          (i + 1) +
+          '" data-phase="' +
+          esc(w.phase) +
+          '" data-climbing="' +
+          w.climbing +
+          '" data-cardio="' +
+          w.cardio +
+          '" data-x="' +
+          x(i) +
+          '" data-y="' +
+          y(w.total) +
+          '"><rect x="' +
+          (x(i) - 12) +
+          '" y="15" width="24" height="104" fill="transparent"/><circle cx="' +
+          x(i) +
+          '" cy="' +
+          y(w.total) +
+          '" r="' +
+          (i === active - 1 ? 5 : 3) +
+          '" fill="' +
+          (i === active - 1 ? "#e74e35" : "#176379") +
+          '"/><text x="' +
+          x(i) +
+          '" y="133" text-anchor="middle">' +
+          (i + 1) +
+          "</text></g>",
+      )
+      .join("") +
+    '<line class="volume-crosshair" y1="18" y2="112" stroke="#176379" stroke-dasharray="3 4" visibility="hidden"/></svg>';
+  return (
+    '<figure class="volume"><figcaption>Block volume</figcaption><strong class="volume-total">' +
+    weeks[active - 1].total +
+    " <small>min this week</small></strong>" +
+    graph +
+    '<div class="volume-tooltip" role="status" aria-live="polite"></div><p class="chart-hint">Hover or focus a week to explore. Climbing + cardio only. <a href="/research.html#endurance-sources">Evidence ↗</a></p></figure>'
+  );
+}
+function showVolume(point) {
+  const figure = point.closest(".volume"),
+    tip = figure.querySelector(".volume-tooltip");
+  const { volumeWeek, phase, climbing, cardio, x } = point.dataset;
+  figure
+    .querySelectorAll(".volume-point")
+    .forEach((p) => p.classList.toggle("hovered", p === point));
+  const line = figure.querySelector(".volume-crosshair");
+  line.setAttribute("x1", x);
+  line.setAttribute("x2", x);
+  line.setAttribute("visibility", "visible");
+  tip.innerHTML =
+    "<strong>Week " +
+    volumeWeek +
+    " · " +
+    esc(phase) +
+    "</strong><span>" +
+    climbing +
+    " min climbing</span><span>" +
+    cardio +
+    " min cardio</span><b>" +
+    (Number(climbing) + Number(cardio)) +
+    " min total</b>";
+  tip.classList.add("visible");
+}
+document.addEventListener("pointerover", (e) => {
+  const p = e.target.closest("[data-volume-week]");
+  if (p) showVolume(p);
+});
+document.addEventListener("focusin", (e) => {
+  const p = e.target.closest("[data-volume-week]");
+  if (p) showVolume(p);
+});
+function hideVolume(figure) {
+  figure.querySelector(".volume-tooltip")?.classList.remove("visible");
+  figure
+    .querySelectorAll(".hovered")
+    .forEach((p) => p.classList.remove("hovered"));
+  figure
+    .querySelector(".volume-crosshair")
+    ?.setAttribute("visibility", "hidden");
+}
+document.addEventListener("pointerout", (e) => {
+  const f = e.target.closest(".volume");
+  if (f && !f.contains(e.relatedTarget)) hideVolume(f);
+});
+document.addEventListener("focusout", (e) => {
+  const f = e.target.closest(".volume");
+  if (f && !f.contains(e.relatedTarget)) hideVolume(f);
+});
 function weekRow(w) {
   const start = dayAdd(state.start, w * 7);
+  let climb = 0,
+    cardio = 0;
   const cells = Array.from({ length: 7 }, (_, i) => {
     const d = dayAdd(start, i),
       p = state.plans[d];
+    if (p.kind === "Climb") climb += p.minutes;
+    else if (p.kind !== "Rest") cardio += p.minutes;
     return (
       '<button class="cell ' +
       (p.kind === "Rest" ? "rest" : p.kind === "Climb" ? "" : "aerobic") +
@@ -275,11 +528,12 @@ function weekRow(w) {
       '" aria-label="' +
       esc(dateLabel(d) + " · " + p.title) +
       '"' +
+      (d === selected ? ' aria-pressed="true"' : "") +
       (d === today ? ' aria-current="date"' : "") +
       "><span>" +
-      DAYS[weekday(d)].slice(0, 3) +
+      (d === today ? "Today" : DAYS[weekday(d)].slice(0, 3)) +
       "</span><strong>" +
-      esc(dateLabel(d, { month: "short", day: "numeric" })) +
+      esc(Number(d.slice(-2))) +
       "</strong><span>" +
       esc(p.kind) +
       (p.minutes ? " · " + p.minutes + "m" : "") +
@@ -292,10 +546,18 @@ function weekRow(w) {
     " · " +
     esc(state.plans[start].phase) +
     "</strong><small>" +
-    esc(dateLabel(start, { month: "short", day: "numeric" })) +
-    " – " +
-    esc(dateLabel(dayAdd(start, 6), { month: "short", day: "numeric" })) +
-    '</small></div><div class="days">' +
+    (mode === "12 weeks"
+      ? esc(dateLabel(start, { month: "short", day: "numeric" }))
+      : "") +
+    (mode === "12 weeks"
+      ? " – " +
+        esc(dateLabel(dayAdd(start, 6), { month: "short", day: "numeric" })) +
+        "　 /　"
+      : "") +
+    climb +
+    " min climbing　·　" +
+    cardio +
+    ' min cardio</small></div><div class="days">' +
     cells +
     "</div></section>"
   );
@@ -303,17 +565,30 @@ function weekRow(w) {
 function calendarView() {
   const end = dayAdd(state.start, 83),
     w = Math.floor(gap(withinBlock(selected), state.start) / 7);
-  const heading =
-    "<h1>" +
-    esc(state.profile.name) +
-    '’s training calendar</h1><p class="intro">' +
-    esc(dateLabel(state.start, { month: "long", day: "numeric" })) +
-    " – " +
-    esc(dateLabel(end, { month: "long", day: "numeric", year: "numeric" })) +
-    "</p>";
+  const path = outlook(state, today);
+  const goalPanel =
+    '<aside class="outlook"><strong>Goal outlook</strong>' +
+    path.lines
+      .map(
+        (l) =>
+          '<div class="goalrow">' +
+          l
+            .replace(" · Awaiting a benchmark trend", "")
+            .split(" · ")
+            .map((v, i) =>
+              i === 0 ? "<b>" + esc(v) + "</b>" : "<span>" + esc(v) + "</span>",
+            )
+            .join("") +
+          "</div>",
+      )
+      .join("") +
+    (path.lines.some((l) => l.includes("Awaiting"))
+      ? '<small class="trendnote">Target dates update with benchmark trends.</small>'
+      : "") +
+    "</aside>";
   const modes =
     '<div class="controls" aria-label="Calendar view">' +
-    ["Day", "Week", "12 weeks"]
+    ["Week", "12 weeks"]
       .map((v) =>
         btn(
           v,
@@ -330,46 +605,96 @@ function calendarView() {
       ? ""
       : '<div class="controls">' +
         btn(
-          "Previous",
+          "‹",
           "move",
           "",
-          "data-step=-" +
+          'aria-label="Previous" data-step=-' +
             step +
             ((mode === "Week" ? w === 0 : selected <= state.start)
               ? " disabled"
               : ""),
         ) +
+        '<label class="jumpdate">' +
+        (mode === "Week"
+          ? dateLabel(dayAdd(state.start, w * 7), {
+              month: "short",
+              day: "numeric",
+            }) +
+            " – " +
+            dateLabel(dayAdd(state.start, w * 7 + 6), {
+              month: "short",
+              day: "numeric",
+            })
+          : dateLabel(selected)) +
         '<input type="date" class="datepick" aria-label="Calendar date" name="calendarDate" min="' +
         state.start +
         '" max="' +
         end +
         '" value="' +
         selected +
-        '">' +
+        '"></label>' +
         btn(
-          "Next",
+          "›",
           "move",
           "",
-          "data-step=" +
+          'aria-label="Next" data-step=' +
             step +
             ((mode === "Week" ? w === 11 : selected >= end) ? " disabled" : ""),
         ) +
-        btn("Today", "today") +
+        (selected === withinBlock(today) ? "" : btn("Today", "today")) +
         "</div>";
-  return (
-    heading +
-    (state.hold || state.paused
+  const identity =
+    '<div class="edition-head"><h1>' +
+    esc(state.profile.name) +
+    "’s calendar</h1><small>Training block " +
+    path.block +
+    " · " +
+    dateLabel(state.start, { month: "short", day: "numeric" }) +
+    " – " +
+    dateLabel(end, { month: "short", day: "numeric", year: "numeric" }) +
+    "</small></div>";
+  const picker =
+    '<div class="caltools">' +
+    modes +
+    (mode === "Week"
+      ? '<b class="weekname">Week ' +
+        (w + 1) +
+        " · " +
+        esc(state.plans[dayAdd(state.start, w * 7)].phase) +
+        "</b>"
+      : "") +
+    controls +
+    "</div>";
+  const trainingStatus =
+    state.hold || state.paused
       ? '<p class="panel">Training is ' +
         (state.hold
           ? "on hold. Review your recovery in Profile."
           : "paused. Resume in Profile when ready.") +
         "</p>"
-      : "") +
-    modes +
-    controls +
-    (mode === "12 weeks"
+      : "";
+  const nav =
+    '<aside class="weeknav">' +
+    identity +
+    picker +
+    (mode === "Week" ? weekRow(w) + volumeChart(w + 1) : "") +
+    "</aside>";
+  const content =
+    mode === "12 weeks"
       ? Array.from({ length: 12 }, (_, i) => weekRow(i)).join("")
-      : (mode === "Week" ? weekRow(w) : "") + workout(selected)) +
+      : workout(selected);
+  return (
+    trainingStatus +
+    '<div class="edition ' +
+    (mode === "Week" ? "weekmode" : "") +
+    '">' +
+    nav +
+    '<div class="agenda">' +
+    content +
+    '</div><aside class="horizon">' +
+    goalPanel +
+    (mode === "Week" ? "" : volumeChart(w + 1)) +
+    "</aside></div>" +
     (today > end ? btn("Start next 12-week block", "nextBlock", "primary") : "")
   );
 }
@@ -529,8 +854,17 @@ document.addEventListener("submit", (e) => {
   const data = new FormData(form);
   guarded(async () => {
     if (form.id === "login") {
-      token = (await api("login", { password: data.get("password") })).token;
-      await load();
+      introPending = true;
+      const intro = startIntro();
+      try {
+        token = (await api("login", { password: data.get("password") })).token;
+        await load();
+        await intro.finish();
+      } finally {
+        intro.close();
+        introPending = false;
+      }
+      if (view !== "Profile") prompts();
       return;
     }
     if (form.id === "profile-form") {
@@ -625,6 +959,13 @@ document.addEventListener("change", (e) => {
   }
 });
 document.addEventListener("click", (e) => {
+  if (e.target.closest(".brand") && state) {
+    e.preventDefault();
+    view = "Calendar";
+    draft = null;
+    render();
+    return;
+  }
   const el = e.target.closest("button[data-act]");
   if (!el) return;
   guarded(async () => {
@@ -651,7 +992,7 @@ document.addEventListener("click", (e) => {
           : a === "today"
             ? withinBlock(today)
             : withinBlock(dayAdd(selected, Number(el.dataset.step)));
-      if (a === "day") mode = "Day";
+      if (a === "day") mode = "Week";
       render();
       return;
     }
@@ -730,7 +1071,20 @@ async function rollover() {
 }
 document.addEventListener("visibilitychange", rollover);
 setInterval(rollover, 60000);
-window.addEventListener("pagehide", () => {
-  if (token) lock();
-});
-loginView();
+async function restoreSession() {
+  token = "browser-session";
+  introPending = true;
+  const intro = startIntro();
+  try {
+    await load();
+    await intro.finish();
+  } catch {
+    token = "";
+    loginView();
+  } finally {
+    intro.close();
+    introPending = false;
+  }
+  if (state && view !== "Profile") prompts();
+}
+restoreSession();

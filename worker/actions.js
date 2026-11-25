@@ -91,8 +91,24 @@ export function profile(input) {
   }
   p.hang = choice(input.hang, ["", ...HANG]);
   p.strength = choice(input.strength, ["", ...STRENGTH]);
-  for (const key of ["fuelRest", "fuelModerate", "fuelHard"])
-    p[key] = string(input[key] || "", 120);
+  for (const [key, max] of [
+    ["fuelCarbs", 3000],
+    ["fuelProtein", 1000],
+    ["fuelFat", 1000],
+    ["fuelCalories", 20000],
+  ])
+    p[key] = number(input[key], 0, max);
+  for (const key of ["climbGoalDate", "sportGoalDate"]) {
+    const date = input[key] || "";
+    requireValue(
+      !date ||
+        (/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+          Number.isFinite(Date.parse(date)) &&
+          dayAdd(date, 0) === date),
+      "Choose a valid goal date.",
+    );
+    p[key] = key === "sportGoalDate" && !p.sport ? "" : date;
+  }
   return p;
 }
 export function apply(s, body, browserZone, now = new Date()) {
@@ -107,6 +123,7 @@ export function apply(s, body, browserZone, now = new Date()) {
       s.profile.zone === "auto" ? browserZone : s.profile.zone,
       now,
     );
+    if (!s.baseline) s.baseline = { day, profile: { ...(p || s.profile) } };
     if (!s.start) s.start = dayAdd(day, 1);
     if (action === "review") {
       const route = string(body.route || "", 160),
