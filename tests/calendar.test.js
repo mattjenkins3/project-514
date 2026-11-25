@@ -158,3 +158,140 @@ test("beta upgrade retains dated workouts, feedback, recovery, and grade", () =>
   assert.equal(s.profile.grade, 10);
   assert.equal(s.profile.sport, SPORTS[1]);
 });
+
+test("recorded goal dates remain separate from benchmark estimates", async () => {
+  const { outlook } = await import("../web/outlook.js");
+  const s = setup({ grade: 8, target: 12, climbGoalDate: "2026-11-20" });
+  assert.match(outlook(s, wed).lines[0], /Target/);
+  change(s, "2026-11-15", {
+    action: "review",
+    profile: { ...s.profile, grade: 9 },
+  });
+  assert.match(
+    outlook(s, "2026-11-15").lines[0],
+    /Trend estimate Dec 27, 2026/,
+  );
+  assert.equal(s.profile.climbGoalDate, "2026-11-20");
+  assert.throws(() => setup({ climbGoalDate: "2026-02-31" }));
+});
+
+test("prescribed minutes and recovery weeks match the daily brief", async () => {
+  const { sessionBrief } = await import("../web/session.js");
+  const s = setup({ sport: SPORTS[1], sportDays: [2, 4], hang: HANG[2] });
+  const weekly = Array(12).fill(0);
+  for (const plan of Object.values(s.plans)) {
+    const phases = sessionBrief(plan).phases;
+    assert.equal(
+      phases.reduce((minutes, [duration]) => minutes + duration, 0),
+      plan.minutes,
+    );
+    weekly[plan.week - 1] += plan.minutes;
+    if ([4, 8, 12].includes(plan.week)) assert.deepEqual(plan.extras, []);
+  }
+  assert.ok(weekly[3] < weekly[2] && weekly[7] < weekly[6]);
+  assert.ok(weekly[6] > weekly[0]);
+});
+
+test("no hangs twice daily on all active days, with strength on overlapping schedules", () => {
+  const s = setup({
+    sport: SPORTS[1],
+    climbDays: [1, 3, 5],
+    sportDays: [2, 4],
+    hang: HANG[0],
+    strength: STRENGTH[1],
+  });
+  for (const plan of Object.values(s.plans)) {
+    const light = plan.extras.filter((x) => x.startsWith(HANG[0]));
+    assert.equal(light.length, plan.kind === "Rest" ? 0 : 1);
+    if (light.length) assert.match(light[0], /Two 10-minute sessions/);
+  }
+  assert.ok(
+    s.plans[dayAdd(monday, 1)].extras.some((x) => x.startsWith("Strength")),
+  );
+  assert.ok(
+    s.plans[dayAdd(monday, 22)].extras.some((x) => x.startsWith(HANG[0])),
+  );
+});
+
+test("optional fueling targets validate and strength covers every non-climbing day", () => {
+  const s = setup({
+    sport: SPORTS[2],
+    sportDays: [2, 4],
+    strength: STRENGTH[1],
+    fuelCarbs: 250,
+    fuelProtein: 120,
+    fuelFat: 70,
+    fuelCalories: 2400,
+  });
+  assert.equal(s.profile.fuelProtein, 120);
+  for (const [date, plan] of Object.entries(s.plans)) {
+    assert.equal(
+      plan.extras.some((x) => x.startsWith("Strength")),
+      plan.kind !== "Climb",
+    );
+  }
+  assert.equal(s.plans[dayAdd(monday, 5)].title, "Strength & recovery");
+  assert.equal(s.plans[dayAdd(monday, 22)].strengthRecovery, true);
+  change(s, wed, {
+    action: "profile",
+    profile: {
+      ...s.profile,
+      fuelCarbs: null,
+      fuelProtein: null,
+      fuelFat: null,
+      fuelCalories: null,
+    },
+  });
+  assert.equal(s.profile.fuelCalories, null);
+  assert.throws(() => setup({ fuelProtein: -1 }));
+});
+
+test("strength sessions rotate, progress, and protect recovery across rebuilds", async () => {
+  const { buildPlan, gap } = await import("../web/model.js");
+  const s = setup({
+    climbDays: [1, 3],
+    sport: SPORTS[1],
+    sportDays: [2, 4],
+    strength: STRENGTH[1],
+  });
+  const main = Object.entries(s.plans).filter(
+    ([, p]) => p.strength?.load === "main",
+  );
+  assert.ok(main.length > 0);
+  for (const [date, plan] of main) {
+    assert.ok(
+      main.filter(([other]) => other <= date && gap(date, other) < 7).length <=
+        2,
+    );
+    assert.ok(
+      main.every(
+        ([other]) => other === date || Math.abs(gap(date, other)) >= 2,
+      ),
+    );
+    assert.ok(![4, 8, 12].includes(plan.week));
+  }
+  const supports = Object.values(s.plans).filter(
+    (p) => p.strength?.load === "support",
+  );
+  assert.ok(new Set(supports.map((p) => p.strength.title)).size >= 3);
+  const week1 = Object.values(s.plans).find(
+    (p) => p.week === 1 && p.strength?.load === "main",
+  );
+  const week7 = Object.values(s.plans).find(
+    (p) => p.week === 7 && p.strength?.load === "main",
+  );
+  assert.notDeepEqual(week1.strength.exercises, week7.strength.exercises);
+  const snapshot = structuredClone(s.plans);
+  buildPlan(s, s.start);
+  assert.deepEqual(s.plans, snapshot);
+  change(s, wed, {
+    action: "feedback",
+    date: monday,
+    outcome: "Harder than planned",
+    recovery: "Tired or sore",
+    minutes: 20,
+    note: "",
+  });
+  assert.equal(s.plans["2026-11-05"].strength.load, "support");
+  assert.deepEqual(s.plans[monday], snapshot[monday]);
+});

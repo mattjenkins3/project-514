@@ -426,3 +426,1479 @@ summary {
     gap: 6px;
   }
 }
+
+:root {
+  --ink: #203a2f;
+  --green: #234a38;
+  --rule: #c9cec1;
+  --paper: #fcfbf6;
+  color: #223328;
+  background: #f7f6ef;
+}
+header {
+  background: #1d2b23;
+}
+.bar,
+main,
+footer {
+  max-width: 1510px;
+  padding-inline: clamp(16px, 3.5vw, 54px);
+  margin: auto;
+}
+.bar {
+  justify-content: flex-start;
+  gap: 28px;
+  padding-block: 12px;
+}
+.brand {
+  font:
+    italic 35px/1 "Instrument Serif",
+    Georgia,
+    serif;
+  letter-spacing: -0.04em;
+}
+.brand b {
+  font-weight: 400;
+  color: #e7c491;
+}
+.bar nav {
+  margin: 0;
+  border: 0;
+  gap: 17px;
+}
+.bar nav button {
+  font-size: 14px;
+  color: #d1d8ce;
+  font-weight: 500;
+}
+.bar nav button.active {
+  color: #fff;
+  border-color: #c3bb85;
+}
+.bar #preferences {
+  margin-left: auto;
+}
+.bar #preferences .field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c5cfc4;
+  font-weight: 400;
+}
+.bar #preferences .tip {
+  display: none;
+}
+.bar #preferences select {
+  width: auto;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #839180;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 0;
+}
+main {
+  padding-block: 30px 50px;
+}
+.edition {
+  display: grid;
+  gap: 22px;
+}
+.edition h1 {
+  font: 600 22px/1.1 system-ui;
+  letter-spacing: -0.05em;
+  margin: 0 0 8px;
+}
+.edition-head small {
+  font-size: 12px;
+}
+.caltools {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.caltools .controls {
+  margin: 0;
+  gap: 4px;
+}
+.caltools button {
+  border: 0;
+  background: transparent;
+  padding: 6px 9px;
+  font: 500 13px system-ui;
+}
+.caltools .controls[aria-label] {
+  padding: 3px;
+  background: #e6e8dc;
+  border-radius: 5px;
+}
+.caltools .controls[aria-label] button.active {
+  background: var(--green);
+  color: white;
+}
+.jumpdate {
+  position: relative;
+  font-size: 14px;
+  font-weight: 600;
+}
+.jumpdate input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.jumpdate:focus-within {
+  outline: 2px solid var(--green);
+}
+.weekname {
+  font: 600 20px/1.15 system-ui;
+  letter-spacing: -0.035em;
+}
+.weeknav .edition-head {
+  padding-bottom: 16px;
+  margin-bottom: 11px;
+  border-bottom: 1px solid var(--rule);
+}
+.week {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  margin: 12px 0;
+}
+.weekheading {
+  margin: 9px 0;
+}
+.weekheading small {
+  font-size: 12px;
+}
+.weekheading strong {
+  font-size: 19px;
+}
+.weekmode .weekheading strong {
+  display: none;
+}
+.cell {
+  background: #e8ecdf;
+  border: 0;
+  border-radius: 1px;
+  padding: 9px;
+  min-height: 63px;
+}
+.cell.rest {
+  background: #eeeee5;
+}
+.cell.aerobic {
+  background: #efe8d5;
+}
+.cell[aria-pressed="true"] {
+  background: var(--green);
+  color: white;
+}
+.cell:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 1px #738366;
+}
+.cell strong {
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+}
+.work {
+  border: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 43fr) minmax(0, 57fr);
+  gap: 18px 24px;
+}
+.dateline {
+  font: 550 14px/1.3 system-ui;
+  color: #52654e;
+  margin: 0 0 12px;
+}
+.work h2 {
+  font:
+    normal clamp(58px, 5.9vw, 94px) / 0.94 "Instrument Serif",
+    Georgia,
+    serif;
+  letter-spacing: -0.04em;
+  margin: 0;
+  max-width: 12ch;
+}
+.work h2 em {
+  font-weight: 400;
+}
+.session-meta {
+  color: #435044;
+  font-size: 13px;
+  margin: 19px 0 15px;
+}
+.instructions {
+  font:
+    21px/1.36 Georgia,
+    serif;
+  letter-spacing: -0.015em;
+  margin: 0;
+  max-width: 42ch;
+  text-wrap: pretty;
+}
+.dose {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  gap: 3px;
+  margin: 19px 0 14px;
+  max-width: 375px;
+}
+.dose li {
+  padding: 5px 8px 0 0;
+  flex: 1;
+  border-top: 3px solid #aeb9a4;
+}
+.dose li:nth-child(2) {
+  flex: 1.6;
+  border-color: #456148;
+}
+.dose li:last-child {
+  border-color: #c8ab6b;
+}
+.dose span,
+.dose b {
+  display: block;
+}
+.dose span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.dose b {
+  font-size: 14px;
+}
+.work .actions {
+  margin: 10px 0 0;
+}
+.quiet {
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.plate {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  background: #0e382e;
+}
+.plate img {
+  display: block;
+  min-height: 0;
+  width: 100%;
+  flex: 1;
+  height: 0;
+  object-fit: cover;
+  object-position: center;
+}
+.plate figcaption {
+  border-top: 1px solid #719083;
+  color: #fff;
+  padding: 12px 16px 15px;
+  font: 15px/1.4 system-ui;
+}
+.plate figcaption b {
+  display: block;
+  color: #f1cc79;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.fieldnotes {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.9fr;
+  gap: 20px;
+  border-block: 1px solid var(--rule);
+  padding: 15px 0;
+}
+.fieldnotes h3 {
+  font: 600 13px/1.3 system-ui;
+  color: #416047;
+  margin: 0 0 6px;
+}
+.fieldnotes p,
+.fieldnotes summary {
+  font: 14px/1.48 system-ui;
+  margin: 0;
+}
+.fieldnotes section:first-child p {
+  font-size: 16px;
+  text-wrap: pretty;
+}
+.fieldnotes details {
+  margin: 0;
+}
+.fieldnotes a,
+footer a {
+  color: #244a38;
+  font-size: 14px;
+}
+.fieldnotes section:only-child {
+  grid-column: 1/-1;
+}
+.report-status {
+  grid-column: 1/-1;
+}
+.horizon {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(0, 1fr);
+  gap: 32px;
+  border-top: 2px solid #3f5645;
+  padding-top: 14px;
+  align-items: start;
+}
+.horizon .outlook > strong,
+.volume figcaption {
+  display: block;
+  font: 600 18px/1.3 system-ui;
+  margin: 0 0 10px;
+  letter-spacing: -0.035em;
+}
+.goalrow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 1fr 1.2fr;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  margin: 6px 0;
+}
+.trendnote {
+  font-size: 12px;
+}
+.volume {
+  margin: 0;
+}
+.volume figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.volume small,
+.volume p {
+  font: 12px/1.4 system-ui;
+  letter-spacing: 0;
+  margin: 0;
+  color: #52654e;
+}
+.volume svg {
+  display: block;
+  width: 100%;
+  height: 115px;
+}
+.volume svg text {
+  font: 11px system-ui;
+  fill: #56604f;
+}
+.volume svg text.value {
+  font-weight: 650;
+  fill: var(--ink);
+}
+.volume .guides path {
+  stroke: #cfd4c4;
+  stroke-width: 1;
+}
+footer {
+  padding-block: 16px;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--rule);
+}
+@media (min-width: 1000px) {
+  .weekmode {
+    grid-template-columns: clamp(210px, 17vw, 250px) minmax(0, 1fr);
+    column-gap: 34px;
+  }
+  .weekmode .caltools {
+    display: grid;
+    gap: 9px;
+    justify-items: start;
+  }
+  .weekmode .days {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .weekmode .cell {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--rule);
+    padding: 6px 8px;
+  }
+  .weekmode .cell strong {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .weekmode .cell span {
+    font-size: 13px;
+  }
+  .weekmode .cell span:first-child {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .weekmode .cell span:last-child {
+    grid-column: 3;
+    font-weight: 400;
+  }
+  .weekmode .cell[aria-pressed="true"] {
+    background: var(--green);
+    color: #fff;
+  }
+  .weekmode .weekheading small {
+    font-size: 12px;
+  }
+  .weekmode .agenda {
+    min-width: 0;
+  }
+}
+@media (max-width: 999px) {
+  .plate img {
+    min-height: 220px;
+  }
+  .bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .edition-head {
+    margin-bottom: 6px;
+  }
+  .bar #preferences .field {
+    display: block;
+  }
+  .horizon {
+    grid-template-columns: 1fr 1fr;
+  }
+  .fieldnotes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 650px) {
+  main {
+    padding-top: 18px;
+  }
+  .bar #preferences {
+    margin: 0;
+  }
+  .bar nav {
+    gap: 9px;
+  }
+  .bar nav button {
+    font-size: 12px;
+  }
+  .work,
+  .horizon,
+  .fieldnotes {
+    grid-template-columns: 1fr;
+  }
+  .plate img {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    max-height: 280px;
+    object-fit: cover;
+  }
+  .work h2 {
+    max-width: none;
+    font-size: 56px;
+  }
+  .instructions {
+    font-size: 18px;
+  }
+  .fieldnotes {
+    gap: 14px;
+  }
+  .edition {
+    gap: 12px;
+  }
+  .horizon {
+    gap: 18px;
+  }
+  .goalrow {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .caltools {
+    gap: 6px;
+  }
+  .days {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .cell {
+    min-width: 0;
+  }
+}
+.weekmode .cell[aria-current="date"] {
+  outline: 0;
+}
+.work h2 {
+  font-size: clamp(53px, 5.1vw, 84px);
+  letter-spacing: -0.035em;
+}
+.work .quiet {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 14px;
+  padding-inline: 4px;
+}
+.timing {
+  margin: 20px 0 15px;
+}
+.timing-line {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+}
+.timing-line i {
+  background: #a9b59b;
+}
+.timing-line i:nth-child(2) {
+  background: #34543c;
+}
+.timing-line i:last-child {
+  background: #c5a355;
+}
+.dose {
+  max-width: none;
+  margin: 8px 0 0;
+  gap: 12px;
+}
+.dose li,
+.dose li:nth-child(2) {
+  border: 0;
+  flex: 1;
+  padding: 0;
+}
+.dose span {
+  font-size: 13px;
+  line-height: 1.3;
+}
+.dose b {
+  font: 500 25px/1.2 system-ui;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+.dose small {
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.caltools button[data-act="move"] {
+  font: 500 22px/1 system-ui;
+  padding: 2px 6px;
+}
+.horizon {
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  gap: 42px;
+}
+.horizon .goalrow {
+  grid-template-columns: 1.15fr 1fr 0.8fr;
+  max-width: 480px;
+  padding: 5px 0;
+}
+.volume svg {
+  height: 143px;
+}
+.horizon .outlook > strong,
+.volume figcaption {
+  font-size: 20px;
+}
+.fieldnotes h3,
+.plate figcaption b {
+  font-size: 13px;
+}
+.plate figcaption {
+  padding: 12px 16px;
+  font-size: 15px;
+}
+.instructions {
+  font-size: 20px;
+}
+.work .primary {
+  border-radius: 3px;
+}
+.cell[aria-pressed="true"]:hover {
+  box-shadow: none;
+}
+@media (max-width: 650px) {
+  .horizon {
+    grid-template-columns: 1fr;
+  }
+  .work h2 {
+    font-size: 55px;
+  }
+  .dose b {
+    font-size: 20px;
+  }
+}
+.work h2 em {
+  display: block;
+  white-space: nowrap;
+}
+.work .actions button.quiet {
+  border: 0 !important;
+  box-shadow: none;
+  background: transparent;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 8px;
+  color: #435a45;
+}
+.work .actions button.quiet:hover {
+  text-decoration: underline;
+}
+.dose span:before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #a9b59b;
+  margin-right: 5px;
+}
+.dose li:nth-child(2) span:before {
+  background: #34543c;
+}
+.dose li:last-child span:before {
+  background: #c5a355;
+}
+.weekmode .weeknav .volume {
+  padding-top: 15px;
+  margin-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+.weeknav .volume figcaption {
+  font-size: 15px;
+}
+.weeknav .volume figcaption small {
+  font-size: 10px;
+}
+.weeknav .volume svg {
+  height: auto;
+  width: 100%;
+}
+.weeknav .volume svg text {
+  font-size: 17px;
+}
+.weeknav .volume svg text.value {
+  font-size: 17px;
+}
+.weeknav .volume p {
+  font-size: 11px;
+}
+.weekmode .horizon {
+  display: block;
+}
+.weekmode .outlook {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.55fr) 1fr 1fr;
+  gap: 0 24px;
+  align-items: start;
+}
+.weekmode .outlook > strong {
+  grid-column: 1;
+  grid-row: 1/3;
+}
+.weekmode .goalrow {
+  max-width: none;
+  grid-template-columns: 1fr auto;
+  row-gap: 4px;
+  border-left: 1px solid var(--rule);
+  padding: 0 0 0 16px;
+  margin: 0;
+}
+.weekmode .goalrow span:nth-child(3) {
+  grid-column: 1/-1;
+  color: #5e6e60;
+}
+.weekmode .trendnote {
+  grid-column: 1/-1;
+  margin-top: 10px;
+}
+.plate img {
+  object-position: 32% 50%;
+}
+.weekmode .weeknav .cell[aria-current="date"] {
+  outline: none;
+  box-shadow: none;
+}
+.weekmode .work .primary {
+  background: #2d4d36;
+}
+@media (max-width: 999px) {
+  .weeknav .volume {
+    max-width: 380px;
+  }
+  .weekmode .outlook {
+    display: block;
+  }
+  .weekmode .goalrow {
+    border: 0;
+    padding: 4px 0;
+  }
+  .weekmode .weeknav .volume {
+    display: none;
+  }
+  .work h2 em {
+    white-space: normal;
+  }
+}
+.plate-image {
+  position: relative;
+  flex: 1;
+  min-height: 250px;
+  overflow: hidden;
+}
+.plate-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.plate-image.foot img {
+  transform: scale(1.38);
+  transform-origin: 18% 62%;
+}
+.dose {
+  gap: 2px;
+}
+.dose li,
+.dose li:nth-child(2) {
+  min-width: 0;
+  padding: 0;
+}
+.dose span:before {
+  display: none;
+}
+.dose li span {
+  font-size: 12px;
+}
+.weeknav .volume svg text,
+.weeknav .volume svg text.value {
+  font-size: 10px;
+}
+.weeknav .volume svg {
+  height: auto;
+  max-height: 140px;
+}
+.weeknav .volume p {
+  margin-top: 2px;
+}
+.weekmode .outlook {
+  grid-template-columns: 180px minmax(200px, 340px) minmax(200px, 340px);
+  justify-content: start;
+  gap: 3px 26px;
+}
+.weekmode .goalrow {
+  display: block;
+}
+.weekmode .goalrow span,
+.weekmode .goalrow b {
+  display: block;
+}
+.weekmode .goalrow span {
+  font-size: 13px;
+}
+.weekmode .trendnote {
+  grid-column: 2/-1;
+  margin: 0;
+}
+.weekmode .horizon {
+  padding: 16px 0 0;
+}
+.work h2 {
+  font-size: clamp(55px, 5.8vw, 93px);
+}
+.weekmode .weeknav .cell strong {
+  font-weight: 550;
+}
+.weekmode .weeknav .cell[aria-pressed="true"] strong {
+  font-weight: 700;
+}
+@media (max-width: 999px) {
+  .weekmode .outlook {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .weekmode .outlook strong,
+  .weekmode .trendnote {
+    grid-column: 1/-1;
+  }
+}
+.plate-image.foot {
+  min-height: 0;
+  flex: 0 0 auto;
+  aspect-ratio: 4/3;
+}
+.plate-image.foot img {
+  object-fit: fill;
+  transform: none;
+}
+.plate:has(.foot) {
+  align-self: start;
+}
+.toe-note {
+  position: absolute;
+  left: 30%;
+  top: 75%;
+  color: #f9edcd;
+  font: 500 12px/1.3 system-ui;
+}
+.toe-note:before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: -4.5vw;
+  width: 4.8vw;
+  transform: rotate(30deg);
+  transform-origin: right;
+  border-top: 1px solid #f2d68a;
+}
+.toe-note:after {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 2.35vw);
+  left: -4.1vw;
+  width: 5px;
+  height: 5px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+}
+.volume-total {
+  font: 600 26px/1.3 system-ui;
+  letter-spacing: -0.055em;
+}
+.volume-total small {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.volume-delta {
+  display: block;
+  font: 12px/1.3 system-ui;
+  color: #62745b;
+}
+.volume figcaption {
+  margin-bottom: 3px;
+}
+.work h2 {
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+}
+.work h2 em {
+  font-weight: 400;
+}
+.edition .actions .quiet {
+  outline: 0;
+  box-shadow: none;
+}
+.weekmode .horizon .trendnote {
+  margin: 7px 0 0;
+}
+.work .session-meta {
+  margin: 13px 0;
+}
+.fieldnotes {
+  gap: 24px;
+}
+@media (min-width: 1000px) {
+  .weekmode {
+    grid-template-rows: auto 1fr;
+    row-gap: 15px;
+  }
+  .weekmode > .weeknav {
+    grid-column: 1;
+    grid-row: 1/3;
+  }
+  .weekmode > .agenda {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .weekmode > .horizon {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    margin: 0;
+    border-top: 0;
+    padding: 0;
+  }
+  .weekmode .outlook {
+    display: grid;
+    grid-template-columns: 130px 1fr 1fr;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 0 12px;
+  }
+  .weekmode .goalrow {
+    padding-left: 14px;
+  }
+  .weekmode .outlook > strong {
+    font: 600 15px/1.3 system-ui;
+  }
+  .weekmode .fieldnotes {
+    border-bottom: 0;
+  }
+  .weekmode .weeknav .volume svg {
+    height: 92px;
+  }
+  .weekmode .weeknav .volume-delta {
+    font-size: 11px;
+  }
+  .weekmode .volume figcaption {
+    font-size: 14px;
+  }
+}
+.work {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 18px 28px;
+}
+.session-cover {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  background: #0d392f;
+  color: #faf3d9;
+  overflow: hidden;
+}
+.session-heading {
+  padding: 26px 22px 20px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.session-heading .dateline {
+  color: #e5d9b5;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+}
+.session-heading h2 {
+  font-size: clamp(56px, 5.5vw, 92px);
+  line-height: 0.97;
+  color: #fff6da;
+  letter-spacing: -0.04em;
+}
+.session-heading h2 em {
+  color: #efd092;
+}
+.session-heading .session-meta {
+  color: #eceddc;
+  font-size: 13px;
+  margin: 0;
+}
+.session-cover .plate {
+  display: block;
+  align-self: stretch;
+  background: #0e392f;
+}
+.session-cover .plate-image {
+  height: 100%;
+  min-height: 215px;
+  aspect-ratio: 4/3;
+}
+.session-cover .plate img {
+  object-fit: fill;
+}
+.session-cover .caption {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  border-top: 1px solid #719082;
+  padding: 11px 23px;
+  color: #fbf6df;
+  font-size: 15px;
+}
+.caption b {
+  font: 600 12px/1.4 system-ui;
+  color: #f3cb78;
+}
+.leader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.leader path {
+  fill: none;
+  stroke: #f9cd61;
+  stroke-width: 4px;
+}
+.leader circle {
+  fill: #fbd36e;
+  stroke: #152e22;
+  stroke-width: 5px;
+}
+.leader text {
+  font: 600 28px system-ui;
+  fill: #fff3d3;
+  paint-order: stroke;
+  stroke: #16372d;
+  stroke-width: 4px;
+}
+.work-copy,
+.prescription {
+  min-width: 0;
+}
+.work-copy h3,
+.prescription h3 {
+  font: 600 14px/1.2 system-ui;
+  color: #3b5645;
+  margin: 0 0 8px;
+}
+.work-copy .instructions p {
+  font:
+    21px/1.38 Georgia,
+    serif;
+  margin: 0;
+}
+.work-copy section:nth-child(2) {
+  margin-top: 11px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.work-copy section:nth-child(2) h3 {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.work-copy section:nth-child(2) p {
+  font: 15px/1.4 system-ui;
+  margin: 0;
+}
+.prescription {
+  border-left: 1px solid var(--rule);
+  padding-left: 23px;
+}
+.prescription .timing {
+  margin: 10px 0;
+}
+.prescription .timing-line {
+  height: 6px;
+}
+.prescription .dose li {
+  flex: 1 !important;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--rule);
+  padding: 5px 0;
+}
+.prescription .dose {
+  display: block;
+  max-width: none;
+  margin: 4px 0;
+}
+.prescription .dose b {
+  font-size: 18px;
+}
+.prescription .dose span {
+  font-size: 14px;
+}
+.prescription .dose span:before {
+  display: inline-block;
+}
+.prescription .actions {
+  margin: 10px 0;
+}
+.fieldnotes {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 28px;
+  padding: 10px 0;
+}
+.session-cover .plate-image.foot img {
+  transform: none;
+}
+.weekmode .fieldnotes {
+  border-top: 1px solid var(--rule);
+}
+.weeknav .volume svg text {
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .work {
+    grid-template-columns: 1fr;
+  }
+  .session-cover {
+    grid-template-columns: 1fr;
+  }
+  .session-heading {
+    padding: 20px;
+  }
+  .session-heading h2 {
+    max-width: none;
+    font-size: 52px;
+  }
+  .session-heading h2 em {
+    display: inline;
+  }
+  .session-cover .plate-image {
+    height: 210px;
+    aspect-ratio: auto;
+  }
+  .session-cover .plate img {
+    object-fit: cover;
+  }
+  .session-cover .caption {
+    display: block;
+  }
+  .caption b {
+    display: block;
+  }
+  .prescription {
+    border: 0;
+    padding: 0;
+  }
+  .fieldnotes {
+    grid-template-columns: 1fr;
+  }
+  .work-copy section:nth-child(2) {
+    display: block;
+  }
+}
+@media (min-width: 760px) {
+  .session-cover:has(.foot) {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  .session-cover:has(.foot) .session-heading {
+    position: relative;
+    z-index: 1;
+    grid-row: 1;
+    grid-column: 1;
+    width: 47%;
+    padding: 23px clamp(20px, 2.2vw, 38px);
+    min-height: 0;
+    pointer-events: none;
+  }
+  .session-cover:has(.foot) .plate {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: stretch;
+  }
+  .session-cover:has(.foot) .plate-image {
+    aspect-ratio: 3/1;
+    min-height: 0;
+    height: auto;
+  }
+  .session-cover:has(.foot) .caption {
+    grid-row: 2;
+    padding: 11px clamp(20px, 2.2vw, 38px);
+  }
+  .session-heading h2 {
+    font-size: clamp(50px, 5.1vw, 86px);
+  }
+  .session-cover:has(.foot) .session-meta {
+    margin-top: 4px;
+  }
+  .session-cover:has(.foot) .session-heading {
+    justify-content: center;
+    gap: 12px;
+  }
+  .session-cover:has(.foot) .dateline {
+    margin-bottom: 5px;
+  }
+}
+.weeknav .volume svg {
+  height: auto !important;
+  min-height: 100px;
+}
+.fieldnotes {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 28px;
+}
+.fieldnotes section:nth-child(2) {
+  border-left: 1px solid var(--rule);
+  padding-left: 23px;
+}
+.weekmode .outlook {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 4px 28px;
+}
+.weekmode .outlook > strong {
+  grid-column: 1/-1;
+  grid-row: auto;
+  margin-bottom: 8px;
+}
+.weekmode .goalrow {
+  padding-left: 0;
+  border: 0;
+  display: flex;
+  gap: 6px 14px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.weekmode .goalrow b {
+  font-size: 15px;
+}
+.weekmode .goalrow span:nth-child(3) {
+  width: 100%;
+}
+.weekmode .goalrow:nth-child(3) {
+  border-left: 1px solid var(--rule);
+  padding-left: 23px;
+}
+.weekmode .trendnote {
+  grid-column: 1/-1;
+  font-size: 11px;
+  margin-top: 4px;
+}
+@media (max-width: 759px) {
+  .session-cover:has(.foot) .plate-image {
+    aspect-ratio: 3/1;
+    min-height: 0;
+    height: auto;
+  }
+  .session-cover:has(.foot) .plate img {
+    object-fit: fill;
+  }
+  .weekmode .outlook,
+  .fieldnotes {
+    display: block;
+  }
+  .fieldnotes section:nth-child(2),
+  .weekmode .goalrow:nth-child(3) {
+    padding: 9px 0;
+    border: 0;
+  }
+}
+/* Session instructions lead the reading order. */
+.work.session-first {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(190px, 0.8fr);
+  gap: 24px 32px;
+  padding: 24px 28px;
+  background: #fffef8;
+  border-top: 2px solid #48664c;
+}
+.work.session-first:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, #fffef8 35%, #fffef8ed),
+    url("/footwork-spread.jpg") center/cover;
+  opacity: 0.12;
+  pointer-events: none;
+}
+.work-heading {
+  grid-column: 1/-1;
+  background: none;
+  color: var(--ink);
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.work.session-first h2 {
+  font:
+    500 clamp(29px, 3vw, 44px) / 1.08 "Instrument Serif",
+    Georgia,
+    serif;
+  max-width: none;
+  letter-spacing: -0.025em;
+  margin: 5px 0 9px;
+}
+.work.session-first .dateline {
+  margin: 0;
+  font-size: 14px;
+}
+.work.session-first .session-meta {
+  margin: 0;
+  font-size: 15px;
+}
+.session-plan > h3 {
+  font: 650 27px/1.2 system-ui;
+  letter-spacing: -0.04em;
+  margin: 0 0 16px;
+}
+.session-stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.session-stages > li {
+  padding: 0 0 20px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.stage-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: baseline;
+  font-size: 19px;
+}
+.stage-heading span {
+  font-size: 15px;
+  white-space: nowrap;
+  color: #4c654e;
+}
+.session-plan p,
+.session-plan li {
+  font-size: 17px;
+  line-height: 1.55;
+}
+.session-stages p {
+  margin: 6px 0 0;
+}
+.training-extra {
+  padding: 18px 20px;
+  margin: 20px 0;
+  background: #edf0e5;
+  border-left: 3px solid #628563;
+}
+.training-extra h3 {
+  font: 650 19px/1.3 system-ui;
+  margin: 0 0 10px;
+}
+.training-extra ul {
+  padding-left: 21px;
+  margin: 12px 0;
+}
+.training-extra li {
+  margin: 9px 0;
+}
+.training-extra a,
+.session-guidance a {
+  color: #285039;
+  font-size: 14px;
+}
+.session-guidance section {
+  margin-bottom: 24px;
+}
+.session-guidance h3 {
+  font: 600 14px/1.3 system-ui;
+  color: #405e43;
+  margin: 0 0 7px;
+}
+.session-guidance p {
+  font: 16px/1.5 system-ui;
+  margin: 0;
+}
+.session-guidance .evidence-note {
+  font-size: 13px;
+  margin: 20px 0 8px;
+  color: #526652;
+}
+.research-page {
+  max-width: 1240px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 22px;
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
+.research-page > h1,
+.research-page > .intro,
+.research-page > #abrahangs {
+  grid-column: 1/-1;
+  margin: 0;
+}
+.research-page > h1 {
+  font:
+    normal 45px/1.1 "Instrument Serif",
+    Georgia,
+    serif;
+}
+.research-page > .intro {
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+.research-page .panel {
+  padding: 21px 25px;
+  margin: 0;
+  border-radius: 0;
+  background: #fffef8;
+}
+.research-page h2 {
+  font: 600 24px/1.2 system-ui;
+  letter-spacing: -0.035em;
+}
+.research-page p,
+.research-page li {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.research-page p {
+  margin: 10px 0;
+}
+.research-page a {
+  color: #31573f;
+  text-underline-offset: 3px;
+}
+.routine-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px 25px;
+  padding-left: 22px;
+  margin: 16px 0;
+}
+.routine-steps li {
+  padding: 4px 0;
+}
+.routine-steps li:first-child {
+  grid-column: 1/-1;
+}
+.research-points {
+  padding-left: 20px;
+  margin: 12px 0;
+}
+.research-points li {
+  margin: 8px 0;
+}
+@media (max-width: 850px) {
+  .work.session-first {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  .session-guidance {
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+  }
+  .research-page {
+    grid-template-columns: 1fr;
+  }
+  .routine-steps {
+    grid-template-columns: 1fr;
+  }
+  .research-page .panel {
+    padding: 18px;
+  }
+}
+.strength-schedule {
+  margin: 18px 0;
+}
+.strength-schedule h3 {
+  font-size: 17px;
+}
+.strength-schedule p {
+  font-size: 15px;
+  color: #4c614e;
+}
+.research-page {
+  align-items: start;
+}
+.research-page .panel h3 {
+  font: 600 18px/1.3 system-ui;
+  margin: 18px 0 8px;
+}

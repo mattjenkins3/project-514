@@ -43,11 +43,25 @@ You need a GitHub account, a free Cloudflare account and Node.js 24 LTS with npm
    npx wrangler secret put APP_PASSWORD
    ```
 
-7. **Open and bookmark your app.** Use the HTTPS URL printed by deploy, typically `https://project-514.YOUR-SUBDOMAIN.workers.dev`. Enter your password and select **Unlock**. Choose your units and grading system at the top, then complete **Your training profile → Create my 12-week plan**. On another device, the same URL and password open the saved log. A new tab or page reload prompts for the password again.
+7. **Open and bookmark your app.** Use the HTTPS URL printed by deploy, typically `https://project-514.YOUR-SUBDOMAIN.workers.dev`. Enter your password and select **Unlock**. Choose your units and grading system at the top, then complete **Your training profile → Create my 12-week plan**. On another device, the same URL and password open the saved log. A session cookie keeps the app unlocked across logo clicks, reloads, and new tabs in the same browser session. A fresh browser session or a different device requires the password. **Lock app** clears the session. Browsers configured to restore sessions may also restore session cookies.
 
 ## Using the calendar
 
-The first block starts the day after setup in your training time zone. Switch between **Day**, **Week** and **12 weeks**. Select any calendar day for its workout. Profile changes and reports recalculate the remaining schedule. Past workout prescriptions stay in your log.
+Set optional climbing and cardio target dates in Profile. The goal outlook counts the 12-week training blocks to each target. With improving comparable benchmarks at least two weeks apart, it also estimates timing from your recorded pace. The daily brief includes session stages, technique and any scheduled finger or strength work. Open **Training research** in the footer for the evidence and the ten-minute no-hang routine.
+
+**Personal fueling references are optional.** In Profile, enter any of four daily targets — carbohydrates (grams), protein (grams), fat (grams), and total calories (kcal). The calendar shows only the targets you enter. Leave all four blank to hide calendar fueling guidance, or clear them later to remove it. Older free-text meal reminders are replaced by these structured targets.
+
+**Strength work runs on every non-climbing day** when selected, including cardio days. Up to two sessions in a rolling seven-day window are main strength sessions, separated by at least two calendar days. Other days use short, easy shoulder, trunk, hip and balance circuits. The main A/B sessions keep familiar movement patterns while sets and repetition ranges progress across the block. Recovery weeks and fatigue reports reduce demand; pulling is limited before a climbing day. Upper-body/core includes a small leg dose, while whole-body adds more lower-body work. The plan specifies effort, sets, repetitions, rest and equipment, leaving weights for you to choose. Pausing training, a pain-related hold, or choosing **Rest today** suspends added strength. Weekly climbing/cardio totals exclude strength and finger sessions.
+
+**Explore weekly volume** by hovering over the Block volume chart or focusing a week with the keyboard. The tooltip shows climbing minutes, cardio minutes, the total and that week’s theme.
+
+**Training research** includes 33 annotated sources, with links from strength sessions and the no-hang routine. The app distinguishes tested findings from its own coaching choices.
+
+**Visuals and motion.** The interface uses yellow, blue, charcoal and coral with locally hosted fonts and artwork. The intro is a 1152 × 768 model-generated film of a tied oval climbing-rope bundle. It was generated locally with [LTX-2.3 via MLX](https://github.com/dgrauet/ltx-2-mlx), then background-matted frame by frame with [Matting Anything 2](https://github.com/ChenyiZhang007/Matting-Anything-2) and interpolated to 60 fps with [RIFE](https://github.com/hzwer/Practical-RIFE). Its transparent WebM and matching WebP poster are bundled with the app. The browser opens the rope film immediately on password submission and every refresh. The 60 fps film uses a matched-pose full rotation and a circular interpolated join. It loops until you click anywhere or press Enter/Space. Entry rapidly accelerates the rotation while fading into the loaded plan. Reduced-motion devices show the static rope and wait for the same entry action. No model downloads, external media services or rendering libraries are needed to run or deploy the app.
+
+**Abrahamsson–Baar No Hangs** schedules two light ten-minute routines on each active day, including lighter weeks, with rest days excluded. Leave at least six hours between finger-loading sessions. The calendar links to the exact routine on **Training research**.
+
+The first block starts the day after setup in your training time zone. Switch between **Week** and **12 weeks**. Select any calendar day for its workout. Profile changes and reports recalculate the remaining schedule. Past workout prescriptions stay in your log.
 
 If you set up on Sunday, November 1, 2026, your plan starts Monday, November 2. When you return on Wednesday, November 4, you can report Monday and Tuesday separately or select **Continue with plan**. Blank days count as completed as directed. You can report or correct a past day later under **Progress**.
 

@@ -3,19 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#173a30" />
+    <meta name="theme-color" content="#19242b" />
     <title>Project 5.14 · Training log</title>
+    <link rel="preload" as="image" href="/rope-poster.webp" />
     <link rel="icon" href="/project-514.svg" />
+    <link rel="stylesheet" href="/fonts.css" />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/theme.css" />
   </head>
   <body>
+    <div id="boot-cover" aria-hidden="true"></div>
     <header>
       <div class="bar">
         <a href="/" class="brand">Project <b>5.14</b></a>
+        <div id="site-nav"></div>
         <div id="preferences"></div>
       </div>
     </header>
     <main id="app"></main>
+    <footer>
+      <strong>Project 5.14</strong
+      ><a href="/research.html" target="_blank" rel="noopener"
+        >Training research ↗</a
+      >
+    </footer>
     <dialog aria-labelledby="dialog-title" id="dialog"></dialog>
     <div id="message" role="status" aria-live="polite"></div>
     <script type="module" src="/app.js"></script>
